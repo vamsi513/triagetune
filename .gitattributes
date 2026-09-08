@@ -1,0 +1,3 @@
+data/raw/*.csv binary
+data/processed/*.csv text eol=lf
+reports/*.csv text eol=lf
