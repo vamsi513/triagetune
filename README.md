@@ -6,7 +6,7 @@ The project is developed in checkpoints. Measurements are recorded only after th
 
 ## Current status
 
-Phase 1 is complete. The Phase 2 majority-class and TF-IDF validation baselines are complete. Unchanged-model evaluation, adapter training, final test evaluation, and serving have not started.
+Phases 1 and 2 are complete. Adapter training, final test evaluation, and serving have not started.
 
 ## Dataset
 
@@ -82,6 +82,37 @@ Measured on 1,998 validation examples:
 The two most frequent directed confusions were `activate_my_card` → `card_arrival` and `exchange_rate` → `card_payment_wrong_exchange_rate`, with five validation examples each. The next was `transfer_fee_charged` → `extra_charge_on_statement`, with four examples. Several three-example confusions occurred among closely related card-delivery, transfer-status, verification, and card-functionality intents.
 
 Complete per-class precision, recall, F1, and support are stored in `reports/tfidf_logreg_validation.json`. The full 77×77 confusion matrix and every validation prediction are stored alongside it. The reserved test split was not loaded.
+
+## Unchanged-model structured-output baseline
+
+The unchanged-model baseline uses `Qwen/Qwen2.5-1.5B-Instruct`, a 1.54B-parameter instruction-tuned model released under Apache 2.0. The run used revision `989aa7980e4cf806f80c7fef2b1adb7bc71aa306`, float16 weights, greedy decoding, a batch size of eight, and at most 32 newly generated tokens. No examples were included in the prompt and no model weights were changed.
+
+The approved output schema for this stage contains only the original dataset target:
+
+```json
+{"category":"one_allowed_category"}
+```
+
+Raw completions are passed directly to `json.loads`. Markdown fences, explanations, extra text, malformed objects, extra keys, and invented labels are not repaired before measurement. Invalid or disallowed outputs count as incorrect classifications.
+
+Measured on all 1,998 validation examples:
+
+| Metric | Measured value |
+| --- | ---: |
+| Accuracy | 0.297798 |
+| Macro F1 | 0.296327 |
+| Correct predictions | 595 of 1,998 |
+| Invalid JSON | 326 of 1,998 (0.163163) |
+| Invalid schema | 375 of 1,998 (0.187688) |
+| Invalid or disallowed category | 405 of 1,998 (0.202703) |
+
+Of the 326 invalid JSON completions, 323 used Markdown code fences and three had other syntax failures. Another 49 parsed as JSON but used the wrong object keys. Thirty more used a structurally valid object with a category outside the allowed label set.
+
+The complete metrics, prompt, runtime configuration, and per-class scores are stored in `reports/base_model_validation.json`. Every raw completion is retained unchanged in `reports/base_model_validation_outputs.jsonl`. The reserved test split was not loaded.
+
+```bash
+python src/evaluate.py --batch-size 8
+```
 
 ## Routing outputs
 
