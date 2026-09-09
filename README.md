@@ -6,7 +6,7 @@ The project is developed in checkpoints. Measurements are recorded only after th
 
 ## Current status
 
-Phases 1 and 2 are complete. Adapter training, final test evaluation, and serving have not started.
+Phases 1 and 2 are complete. The adapter-training pipeline is implemented and has passed a disposable two-step hardware check. The first full run was stopped by request before its first checkpoint, so no trained adapter or final training metrics are reported yet. Final test evaluation and serving have not started.
 
 ## Dataset
 
@@ -113,6 +113,26 @@ The complete metrics, prompt, runtime configuration, and per-class scores are st
 ```bash
 python src/evaluate.py --batch-size 8
 ```
+
+## Adapter training
+
+The training entry point applies response-only LoRA tuning to the same pinned 1.5B-parameter base model used by the unchanged-model baseline. It masks all system and user prompt tokens from the loss and supervises only the exact category JSON response.
+
+The approved configuration uses rank 16, alpha 32, dropout 0.05, and the query, key, value, and output attention projections. It uses a micro-batch size of two, eight gradient-accumulation steps, a maximum sequence length of 544, a learning rate of `2e-4`, cosine decay, 30 warmup steps, and at most two epochs. Validation and adapter-only checkpoints occur every 250 optimizer steps. A three-hour wall-clock guard bounds the run.
+
+Run the disposable two-step hardware check:
+
+```bash
+python src/train_lora.py --smoke-test
+```
+
+Start a fresh tracked run:
+
+```bash
+python src/train_lora.py
+```
+
+Completed runs write local experiment data under `mlruns/`, checkpoints under `checkpoints/`, and the final adapter under `artifacts/lora_adapter/`. Those runtime artifacts are excluded from version control. The reproducible final configuration, measured losses, runtime, and adapter file hashes will be written to `reports/lora_training.json` only after a run completes.
 
 ## Routing outputs
 
