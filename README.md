@@ -6,7 +6,7 @@ The project is developed in checkpoints. Measurements are recorded only after th
 
 ## Current status
 
-Phases 1 and 2 are complete. The adapter-training pipeline is implemented and has passed a disposable two-step hardware check. The first full run was stopped by request before its first checkpoint, so no trained adapter or final training metrics are reported yet. Final test evaluation and serving have not started.
+Phases 1 and 2 and adapter training are complete. The response-only adapter is saved locally with measured training and validation losses. Final test evaluation and serving have not started.
 
 ## Dataset
 
@@ -118,7 +118,7 @@ python src/evaluate.py --batch-size 8
 
 The training entry point applies response-only LoRA tuning to the same pinned 1.5B-parameter base model used by the unchanged-model baseline. It masks all system and user prompt tokens from the loss and supervises only the exact category JSON response.
 
-The approved configuration uses rank 16, alpha 32, dropout 0.05, and the query, key, value, and output attention projections. It uses a micro-batch size of two, eight gradient-accumulation steps, a maximum sequence length of 544, a learning rate of `2e-4`, cosine decay, 30 warmup steps, and at most two epochs. Validation and adapter-only checkpoints occur every 250 optimizer steps. A three-hour wall-clock guard bounds the run.
+The approved configuration uses rank 16, alpha 32, dropout 0.05, and the query, key, value, and output attention projections. It uses a micro-batch size of two, eight gradient-accumulation steps, a maximum sequence length of 544, a learning rate of `2e-4`, cosine decay, 30 warmup steps, and at most two epochs. Validation and adapter-only checkpoints occur every 250 optimizer steps. A three-hour wall-clock guard stops training between optimizer steps; an in-progress full validation pass is allowed to finish so its measurement and checkpoint remain valid.
 
 Run the disposable two-step hardware check:
 
@@ -132,7 +132,22 @@ Start a fresh tracked run:
 python src/train_lora.py
 ```
 
-Completed runs write local experiment data under `mlruns/`, checkpoints under `checkpoints/`, and the final adapter under `artifacts/lora_adapter/`. Those runtime artifacts are excluded from version control. The reproducible final configuration, measured losses, runtime, and adapter file hashes will be written to `reports/lora_training.json` only after a run completes.
+The completed run stopped after 251 optimizer steps because of the wall-clock guard. The step-250 checkpoint was selected after evaluation on all 1,998 validation records.
+
+| Metric | Measured value |
+| --- | ---: |
+| Completed optimizer steps | 251 of 1,000 maximum |
+| Completed epochs | 0.502377 |
+| Aggregate training loss | 0.126404 |
+| Validation loss | 0.065802 |
+| Tracked training runtime | 13,264.4 seconds |
+| Trainable adapter parameters | 4,358,144 |
+| Adapter weight file | 17,462,432 bytes |
+| Adapter and tokenizer files | 28,893,841 bytes |
+
+The tracked runtime was 3 hours, 41 minutes because the full validation pass began before the three-hour boundary and was allowed to complete. The adapter contains no complete base-model weight file.
+
+Local experiment data is stored under `mlruns/`, the resumable checkpoint under `checkpoints/`, and the final adapter under `artifacts/lora_adapter/`. Those runtime artifacts are excluded from version control. The reproducible configuration, measured losses, runtime, and adapter file hashes are recorded in `reports/lora_training.json`; the tracked loss history is in `reports/lora_training_history.json`.
 
 ## Routing outputs
 

@@ -407,7 +407,10 @@ def run(args: argparse.Namespace) -> None:
         train_result = trainer.train(
             resume_from_checkpoint=str(args.resume_from_checkpoint) if args.resume_from_checkpoint else None
         )
-        evaluation = trainer.evaluate()
+        if wall_clock.stopped_for_time and trainer.state.best_metric is not None:
+            evaluation = {"eval_loss": trainer.state.best_metric}
+        else:
+            evaluation = trainer.evaluate()
         elapsed_seconds = time.perf_counter() - run_started
 
         if args.adapter_dir.exists():
