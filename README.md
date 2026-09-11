@@ -6,7 +6,7 @@ The project is developed in checkpoints. Measurements are recorded only after th
 
 ## Current status
 
-Phases 1 through 3 and the first final-evaluation stage are complete. The reserved test split has been scored once with all four approaches. Confidence intervals, error analysis, robustness checks, and serving have not started.
+Phases 1 through 3 and the first two final-evaluation stages are complete. The reserved test split has been scored once with all four approaches, followed by confidence intervals and error analysis using the saved predictions. Robustness checks and serving have not started.
 
 ## Dataset
 
@@ -169,6 +169,29 @@ Rebuild the classical test reports and then the validated comparison with:
 ```bash
 python src/evaluate_classical.py
 python src/summarize_test_evaluation.py
+```
+
+## Final test evaluation: Stage 2
+
+Uncertainty was measured without retraining or generating new predictions. The analysis used 10,000 deterministic stratified bootstrap samples with seed `42`; each replicate sampled 40 records with replacement from every category. Paired comparisons reused identical sampled rows for both approaches.
+
+| Approach | Accuracy with 95% CI | Macro F1 with 95% CI |
+| --- | ---: | ---: |
+| Majority class | 0.012987 [0.012987, 0.012987] | 0.000333 [0.000333, 0.000333] |
+| TF-IDF + logistic regression | 0.846753 [0.834740, 0.858766] | 0.845445 [0.832749, 0.857287] |
+| Unchanged base model | 0.301623 [0.288312, 0.314935] | 0.307655 [0.291863, 0.320361] |
+| Saved LoRA adapter | 0.804870 [0.792532, 0.817208] | 0.804991 [0.791518, 0.816938] |
+
+The paired TF-IDF-minus-adapter difference is 0.041883 accuracy with a 95% interval of [0.027273, 0.056494], and 0.040454 macro F1 with an interval of [0.025569, 0.055830]. Both intervals exclude zero. The adapter exceeds the unchanged base model by 0.503247 accuracy with an interval of [0.486364, 0.519805].
+
+The adapter has 601 errors. Its largest concentrations are `top_up_failed` → `topping_up_by_card` (29), `top_up_limits` → `topping_up_by_card` (26), `card_swallowed` → `cash_withdrawal_not_recognised` (23), and `pin_blocked` → `change_pin` (16). It beats the TF-IDF baseline on class F1 for 29 categories and trails it on 48. Of the 3,080 examples, both approaches are correct on 2,224, only TF-IDF is correct on 384, only the adapter is correct on 255, and both are wrong on 217.
+
+The complete method, all metric intervals, paired differences, correctness overlaps, weakest categories, top 15 confusion pairs, and representative examples are in `reports/test_error_analysis.json`. A concise readable version is in `reports/test_error_analysis.md`.
+
+Reproduce Stage 2 from the saved predictions with:
+
+```bash
+python src/analyze_test_results.py
 ```
 
 ## Routing outputs

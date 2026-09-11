@@ -1,0 +1,1842 @@
+{
+  "analysis": "final_test_uncertainty_and_errors",
+  "stage": "phase_4_stage_2",
+  "source": "saved_phase_4_stage_1_predictions",
+  "retraining_performed": false,
+  "records": 3080,
+  "classes": 77,
+  "bootstrap": {
+    "method": "stratified percentile bootstrap with paired row samples",
+    "samples": 10000,
+    "seed": 42,
+    "confidence_level": 0.95,
+    "records_sampled_per_class": 40
+  },
+  "confidence_intervals": {
+    "majority": {
+      "accuracy": {
+        "point": 0.012987012987012988,
+        "confidence_interval_95": [
+          0.012987012987012988,
+          0.012987012987012988
+        ]
+      },
+      "macro_precision": {
+        "point": 0.000168662506324844,
+        "confidence_interval_95": [
+          0.000168662506324844,
+          0.000168662506324844
+        ]
+      },
+      "macro_recall": {
+        "point": 0.012987012987012988,
+        "confidence_interval_95": [
+          0.012987012987012988,
+          0.012987012987012988
+        ]
+      },
+      "macro_f1": {
+        "point": 0.00033300033300033305,
+        "confidence_interval_95": [
+          0.00033300033300033305,
+          0.00033300033300033305
+        ]
+      }
+    },
+    "tfidf_logreg": {
+      "accuracy": {
+        "point": 0.8467532467532467,
+        "confidence_interval_95": [
+          0.8347402597402598,
+          0.8587662337662337
+        ]
+      },
+      "macro_precision": {
+        "point": 0.8585638226795645,
+        "confidence_interval_95": [
+          0.8493776683722539,
+          0.8717033577986713
+        ]
+      },
+      "macro_recall": {
+        "point": 0.8467532467532468,
+        "confidence_interval_95": [
+          0.8347402597402597,
+          0.858766233766234
+        ]
+      },
+      "macro_f1": {
+        "point": 0.8454445661816897,
+        "confidence_interval_95": [
+          0.8327494595668884,
+          0.8572868779402879
+        ]
+      }
+    },
+    "base_model": {
+      "accuracy": {
+        "point": 0.3016233766233766,
+        "confidence_interval_95": [
+          0.2883116883116883,
+          0.31493506493506496
+        ]
+      },
+      "macro_precision": {
+        "point": 0.5025036743748936,
+        "confidence_interval_95": [
+          0.45996619721729,
+          0.5205070347341869
+        ]
+      },
+      "macro_recall": {
+        "point": 0.3016233766233766,
+        "confidence_interval_95": [
+          0.28831168831168824,
+          0.31493506493506496
+        ]
+      },
+      "macro_f1": {
+        "point": 0.30765477726698487,
+        "confidence_interval_95": [
+          0.2918627684663831,
+          0.3203606914428443
+        ]
+      }
+    },
+    "lora_adapter": {
+      "accuracy": {
+        "point": 0.8048701298701298,
+        "confidence_interval_95": [
+          0.7925324675324675,
+          0.8172077922077922
+        ]
+      },
+      "macro_precision": {
+        "point": 0.8482112325808493,
+        "confidence_interval_95": [
+          0.8391318207219589,
+          0.8608301674343627
+        ]
+      },
+      "macro_recall": {
+        "point": 0.8048701298701298,
+        "confidence_interval_95": [
+          0.7925324675324674,
+          0.8172077922077923
+        ]
+      },
+      "macro_f1": {
+        "point": 0.804990809472458,
+        "confidence_interval_95": [
+          0.7915177021085014,
+          0.8169378725506757
+        ]
+      }
+    }
+  },
+  "paired_comparisons": [
+    {
+      "left": "tfidf_logreg",
+      "right": "lora_adapter",
+      "accuracy": {
+        "difference": 0.041883116883116855,
+        "confidence_interval_95": [
+          0.027272727272727226,
+          0.056493506493506485
+        ],
+        "interval_excludes_zero": true
+      },
+      "macro_f1": {
+        "difference": 0.04045375670923168,
+        "confidence_interval_95": [
+          0.025568925647283188,
+          0.05583014459908123
+        ],
+        "interval_excludes_zero": true
+      }
+    },
+    {
+      "left": "lora_adapter",
+      "right": "base_model",
+      "accuracy": {
+        "difference": 0.5032467532467533,
+        "confidence_interval_95": [
+          0.4863636363636364,
+          0.5198051948051947
+        ],
+        "interval_excludes_zero": true
+      },
+      "macro_f1": {
+        "difference": 0.4973360322054732,
+        "confidence_interval_95": [
+          0.4807395031450369,
+          0.5158818485564907
+        ],
+        "interval_excludes_zero": true
+      }
+    },
+    {
+      "left": "tfidf_logreg",
+      "right": "base_model",
+      "accuracy": {
+        "difference": 0.5451298701298701,
+        "confidence_interval_95": [
+          0.5285633116883116,
+          0.562012987012987
+        ],
+        "interval_excludes_zero": true
+      },
+      "macro_f1": {
+        "difference": 0.5377897889147049,
+        "confidence_interval_95": [
+          0.5215141860296542,
+          0.556867049674773
+        ],
+        "interval_excludes_zero": true
+      }
+    }
+  ],
+  "error_analysis": {
+    "majority": {
+      "total_errors": 3040,
+      "valid_label_classification_errors": 3040,
+      "invalid_or_disallowed_outputs": 0,
+      "top_confusions": [
+        {
+          "actual": "activate_my_card",
+          "predicted": "card_payment_fee_charged",
+          "count": 40,
+          "examples": [
+            {
+              "row_index": 2840,
+              "text": "Could you please activate my card"
+            },
+            {
+              "row_index": 2841,
+              "text": "I need to activate my card can you do that now?"
+            },
+            {
+              "row_index": 2842,
+              "text": "What do I need to do to activate my new card?"
+            }
+          ]
+        },
+        {
+          "actual": "age_limit",
+          "predicted": "card_payment_fee_charged",
+          "count": 40,
+          "examples": [
+            {
+              "row_index": 480,
+              "text": "how old do i need to be to get an account for myself"
+            },
+            {
+              "row_index": 481,
+              "text": "How young can I be to open my own account?"
+            },
+            {
+              "row_index": 482,
+              "text": "How old do I have to be?"
+            }
+          ]
+        },
+        {
+          "actual": "apple_pay_or_google_pay",
+          "predicted": "card_payment_fee_charged",
+          "count": 40,
+          "examples": [
+            {
+              "row_index": 2960,
+              "text": "Is the top up feature available on the Apple Watch?"
+            },
+            {
+              "row_index": 2961,
+              "text": "Can I use the system Google Pay for top-ups?"
+            },
+            {
+              "row_index": 2962,
+              "text": "My top-up for Google Pay isn't working"
+            }
+          ]
+        },
+        {
+          "actual": "atm_support",
+          "predicted": "card_payment_fee_charged",
+          "count": 40,
+          "examples": [
+            {
+              "row_index": 1440,
+              "text": "Do all ATMs take this card?"
+            },
+            {
+              "row_index": 1441,
+              "text": "Which ATMs accept this card?"
+            },
+            {
+              "row_index": 1442,
+              "text": "Where is the closest Mastercard ATM?"
+            }
+          ]
+        },
+        {
+          "actual": "automatic_top_up",
+          "predicted": "card_payment_fee_charged",
+          "count": 40,
+          "examples": [
+            {
+              "row_index": 320,
+              "text": "When traveling, can I auto top-up my card at certain times?"
+            },
+            {
+              "row_index": 321,
+              "text": "Is there a limit when using auto top-up?"
+            },
+            {
+              "row_index": 322,
+              "text": "Will it automatically top-up or do I need to do that manually if there isn't much cash left?"
+            }
+          ]
+        },
+        {
+          "actual": "balance_not_updated_after_bank_transfer",
+          "predicted": "card_payment_fee_charged",
+          "count": 40,
+          "examples": [
+            {
+              "row_index": 2680,
+              "text": "I made a transfer a few hours ago from a UK banking account.  I do not yet see the transfer.  Please check on this for me."
+            },
+            {
+              "row_index": 2681,
+              "text": "the balance on my account didnt change when i transferred money"
+            },
+            {
+              "row_index": 2682,
+              "text": "How long will it take for my transferred money to show up?"
+            }
+          ]
+        },
+        {
+          "actual": "balance_not_updated_after_cheque_or_cash_deposit",
+          "predicted": "card_payment_fee_charged",
+          "count": 40,
+          "examples": [
+            {
+              "row_index": 1040,
+              "text": "I tried making an update to my balance using cheque just yesterday but it doesn't appear to have worked. Should this not be a faster process? I need you to please check over my account because something has went wrong."
+            },
+            {
+              "row_index": 1041,
+              "text": "How come I don't see my deposit in my account yet?"
+            },
+            {
+              "row_index": 1042,
+              "text": "Is there a reason why my account isn't updating because I used a check to  balance my account?"
+            }
+          ]
+        },
+        {
+          "actual": "beneficiary_not_allowed",
+          "predicted": "card_payment_fee_charged",
+          "count": 40,
+          "examples": [
+            {
+              "row_index": 2160,
+              "text": "I've tried numerous times to submit a transfer of funds. Why isn't it going through?"
+            },
+            {
+              "row_index": 2161,
+              "text": "I've transferred money before without issue but now I am encountering an error stating that it isn't possible. Why is that?"
+            },
+            {
+              "row_index": 2162,
+              "text": "I am not able to do a transfer to an account"
+            }
+          ]
+        },
+        {
+          "actual": "cancel_transfer",
+          "predicted": "card_payment_fee_charged",
+          "count": 40,
+          "examples": [
+            {
+              "row_index": 680,
+              "text": "I made a transaction this morning and would like to revert it."
+            },
+            {
+              "row_index": 681,
+              "text": "Can i cancel a charge?"
+            },
+            {
+              "row_index": 682,
+              "text": "Can I cancel my transaction?"
+            }
+          ]
+        },
+        {
+          "actual": "card_about_to_expire",
+          "predicted": "card_payment_fee_charged",
+          "count": 40,
+          "examples": [
+            {
+              "row_index": 2920,
+              "text": "Am I able to order a new card and have it sent to me in China?"
+            },
+            {
+              "row_index": 2921,
+              "text": "Will you be able to send the new card to China?"
+            },
+            {
+              "row_index": 2922,
+              "text": "When my card expires what happens to my account?"
+            }
+          ]
+        },
+        {
+          "actual": "card_acceptance",
+          "predicted": "card_payment_fee_charged",
+          "count": 40,
+          "examples": [
+            {
+              "row_index": 960,
+              "text": "Will my card be accepted all over the world?"
+            },
+            {
+              "row_index": 961,
+              "text": "Who accepts this card?"
+            },
+            {
+              "row_index": 962,
+              "text": "Can I use my card for payment all over the world?"
+            }
+          ]
+        },
+        {
+          "actual": "card_arrival",
+          "predicted": "card_payment_fee_charged",
+          "count": 40,
+          "examples": [
+            {
+              "row_index": 0,
+              "text": "How do I locate my card?"
+            },
+            {
+              "row_index": 1,
+              "text": "I still have not received my new card, I ordered over a week ago."
+            },
+            {
+              "row_index": 2,
+              "text": "I ordered a card but it has not arrived. Help please!"
+            }
+          ]
+        },
+        {
+          "actual": "card_delivery_estimate",
+          "predicted": "card_payment_fee_charged",
+          "count": 40,
+          "examples": [
+            {
+              "row_index": 280,
+              "text": "I need my card now!"
+            },
+            {
+              "row_index": 281,
+              "text": "my card was not in the mail again can you advise?"
+            },
+            {
+              "row_index": 282,
+              "text": "i need my card quick"
+            }
+          ]
+        },
+        {
+          "actual": "card_linking",
+          "predicted": "card_payment_fee_charged",
+          "count": 40,
+          "examples": [
+            {
+              "row_index": 40,
+              "text": "Why won't my card show up on the app?"
+            },
+            {
+              "row_index": 41,
+              "text": "I would like to reactivate my card."
+            },
+            {
+              "row_index": 42,
+              "text": "Where do I link the new card?"
+            }
+          ]
+        },
+        {
+          "actual": "card_not_working",
+          "predicted": "card_payment_fee_charged",
+          "count": 40,
+          "examples": [
+            {
+              "row_index": 360,
+              "text": "I've tried my card a bunch of times and it never worked."
+            },
+            {
+              "row_index": 361,
+              "text": "I can't get my card to work."
+            },
+            {
+              "row_index": 362,
+              "text": "My card appears to be broken how can I fix it?"
+            }
+          ]
+        }
+      ],
+      "lowest_f1_classes": [
+        {
+          "category": "activate_my_card",
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 40
+        },
+        {
+          "category": "age_limit",
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 40
+        },
+        {
+          "category": "apple_pay_or_google_pay",
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 40
+        },
+        {
+          "category": "atm_support",
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 40
+        },
+        {
+          "category": "automatic_top_up",
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 40
+        },
+        {
+          "category": "balance_not_updated_after_bank_transfer",
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 40
+        },
+        {
+          "category": "balance_not_updated_after_cheque_or_cash_deposit",
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 40
+        },
+        {
+          "category": "beneficiary_not_allowed",
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 40
+        },
+        {
+          "category": "cancel_transfer",
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 40
+        },
+        {
+          "category": "card_about_to_expire",
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 40
+        }
+      ],
+      "zero_f1_class_count": 76,
+      "classes_below_0_50_f1": 77,
+      "structured_output": {
+        "applicable": false,
+        "invalid_json_rate": null
+      }
+    },
+    "tfidf_logreg": {
+      "total_errors": 472,
+      "valid_label_classification_errors": 472,
+      "invalid_or_disallowed_outputs": 0,
+      "top_confusions": [
+        {
+          "actual": "virtual_card_not_working",
+          "predicted": "get_disposable_virtual_card",
+          "count": 11,
+          "examples": [
+            {
+              "row_index": 2520,
+              "text": "Why is my disposable virtual card being denied?"
+            },
+            {
+              "row_index": 2522,
+              "text": "My disposable virtual card is broken."
+            },
+            {
+              "row_index": 2524,
+              "text": "Why did the disposable virtual card which I used to pay a gym subscription get denied?"
+            }
+          ]
+        },
+        {
+          "actual": "virtual_card_not_working",
+          "predicted": "getting_virtual_card",
+          "count": 10,
+          "examples": [
+            {
+              "row_index": 2525,
+              "text": "Why is my virtual card is being declined?"
+            },
+            {
+              "row_index": 2531,
+              "text": "Can I make multiple online transactions with my virtual card?"
+            },
+            {
+              "row_index": 2532,
+              "text": "Why was my virtual card declined when attempting to setup automatic billing?"
+            }
+          ]
+        },
+        {
+          "actual": "card_acceptance",
+          "predicted": "card_not_working",
+          "count": 8,
+          "examples": [
+            {
+              "row_index": 967,
+              "text": "What stores can I sue my card?"
+            },
+            {
+              "row_index": 979,
+              "text": "I am traveling to Germany, Will I be able to use my card there?"
+            },
+            {
+              "row_index": 982,
+              "text": "Will I be able to use my card anywhere?"
+            }
+          ]
+        },
+        {
+          "actual": "get_disposable_virtual_card",
+          "predicted": "disposable_card_limits",
+          "count": 6,
+          "examples": [
+            {
+              "row_index": 2607,
+              "text": "How do the disposable cards work?"
+            },
+            {
+              "row_index": 2610,
+              "text": "Can you explain the disposable cards to me?"
+            },
+            {
+              "row_index": 2616,
+              "text": "Can you explain disposable cards?"
+            }
+          ]
+        },
+        {
+          "actual": "atm_support",
+          "predicted": "declined_cash_withdrawal",
+          "count": 5,
+          "examples": [
+            {
+              "row_index": 1447,
+              "text": "Is there any nearby ATM's?"
+            },
+            {
+              "row_index": 1450,
+              "text": "Help me locate the nearest ATM."
+            },
+            {
+              "row_index": 1455,
+              "text": "How many miles away is the ATM?"
+            }
+          ]
+        },
+        {
+          "actual": "card_swallowed",
+          "predicted": "declined_cash_withdrawal",
+          "count": 5,
+          "examples": [
+            {
+              "row_index": 1926,
+              "text": "Is there a way I can get my ATM card back from the machine?"
+            },
+            {
+              "row_index": 1934,
+              "text": "My ATM got stuck and I'm not sure what to do."
+            },
+            {
+              "row_index": 1944,
+              "text": "Why would an ATM swallow my card?"
+            }
+          ]
+        },
+        {
+          "actual": "pending_transfer",
+          "predicted": "transfer_timing",
+          "count": 5,
+          "examples": [
+            {
+              "row_index": 1857,
+              "text": "How long do transfer pend for?"
+            },
+            {
+              "row_index": 1859,
+              "text": "When will the transfer go through?"
+            },
+            {
+              "row_index": 1864,
+              "text": "When will the transfer be completed?"
+            }
+          ]
+        },
+        {
+          "actual": "top_up_by_cash_or_cheque",
+          "predicted": "balance_not_updated_after_cheque_or_cash_deposit",
+          "count": 5,
+          "examples": [
+            {
+              "row_index": 2446,
+              "text": "Need to deposit a cheque into my account"
+            },
+            {
+              "row_index": 2447,
+              "text": "I'm looking for the cash deposit top up option but can't find it. Can you help me?"
+            },
+            {
+              "row_index": 2452,
+              "text": "Can I add to my account balance with a cheque?"
+            }
+          ]
+        },
+        {
+          "actual": "verify_my_identity",
+          "predicted": "why_verify_identity",
+          "count": 5,
+          "examples": [
+            {
+              "row_index": 3000,
+              "text": "What can I use to verify my identify?"
+            },
+            {
+              "row_index": 3001,
+              "text": "What do you need to verify my identity?"
+            },
+            {
+              "row_index": 3005,
+              "text": "What do you need for my identity check?"
+            }
+          ]
+        },
+        {
+          "actual": "why_verify_identity",
+          "predicted": "verify_my_identity",
+          "count": 5,
+          "examples": [
+            {
+              "row_index": 1162,
+              "text": "do I need to verify my identity every time I log into my account?"
+            },
+            {
+              "row_index": 1183,
+              "text": "Do I really need to verify my identity?"
+            },
+            {
+              "row_index": 1189,
+              "text": "I do not wish to verify my identity."
+            }
+          ]
+        },
+        {
+          "actual": "activate_my_card",
+          "predicted": "card_arrival",
+          "count": 4,
+          "examples": [
+            {
+              "row_index": 2847,
+              "text": "I received my new card, how is it activated?"
+            },
+            {
+              "row_index": 2848,
+              "text": "Is there a way my new card can be renewed?"
+            },
+            {
+              "row_index": 2852,
+              "text": "WHAT CAN I DO AFTER THE CARD MISSING"
+            }
+          ]
+        },
+        {
+          "actual": "card_not_working",
+          "predicted": "declined_card_payment",
+          "count": 4,
+          "examples": [
+            {
+              "row_index": 360,
+              "text": "I've tried my card a bunch of times and it never worked."
+            },
+            {
+              "row_index": 377,
+              "text": "My card was declined today when eating and I need to know what's wrong."
+            },
+            {
+              "row_index": 393,
+              "text": "I have tried to use my card several times and it does not work."
+            }
+          ]
+        },
+        {
+          "actual": "card_payment_not_recognised",
+          "predicted": "extra_charge_on_statement",
+          "count": 4,
+          "examples": [
+            {
+              "row_index": 1101,
+              "text": "I think my statement has a fraudulent charge"
+            },
+            {
+              "row_index": 1107,
+              "text": "I have an unauthorized transaction on my statement"
+            },
+            {
+              "row_index": 1110,
+              "text": "I see a charge on my account that I don't recall making. I feel like my account may have been compromised."
+            }
+          ]
+        },
+        {
+          "actual": "compromised_card",
+          "predicted": "terminate_account",
+          "count": 4,
+          "examples": [
+            {
+              "row_index": 1405,
+              "text": "Freeze my account it's been hacked."
+            },
+            {
+              "row_index": 1412,
+              "text": "How can I stop fraud on my account right now?"
+            },
+            {
+              "row_index": 1419,
+              "text": "I see random purchases to my account, was it hacked?"
+            }
+          ]
+        },
+        {
+          "actual": "contactless_not_working",
+          "predicted": "card_not_working",
+          "count": 4,
+          "examples": [
+            {
+              "row_index": 561,
+              "text": "My contanctless has stopped working"
+            },
+            {
+              "row_index": 563,
+              "text": "I don't know what's wrong, my contactless stopped working. Tried it in a few different places today and it didn't work in any of them."
+            },
+            {
+              "row_index": 575,
+              "text": "What can I do if contactless doesn't work?"
+            }
+          ]
+        }
+      ],
+      "lowest_f1_classes": [
+        {
+          "category": "virtual_card_not_working",
+          "precision": 1.0,
+          "recall": 0.325,
+          "f1": 0.4905660377358491,
+          "support": 40
+        },
+        {
+          "category": "card_not_working",
+          "precision": 0.5818181818181818,
+          "recall": 0.8,
+          "f1": 0.6736842105263158,
+          "support": 40
+        },
+        {
+          "category": "get_disposable_virtual_card",
+          "precision": 0.6666666666666666,
+          "recall": 0.7,
+          "f1": 0.6829268292682926,
+          "support": 40
+        },
+        {
+          "category": "pending_transfer",
+          "precision": 0.8571428571428571,
+          "recall": 0.6,
+          "f1": 0.7058823529411764,
+          "support": 40
+        },
+        {
+          "category": "balance_not_updated_after_bank_transfer",
+          "precision": 0.6595744680851063,
+          "recall": 0.775,
+          "f1": 0.7126436781609196,
+          "support": 40
+        },
+        {
+          "category": "topping_up_by_card",
+          "precision": 0.8333333333333334,
+          "recall": 0.625,
+          "f1": 0.7142857142857143,
+          "support": 40
+        },
+        {
+          "category": "transfer_not_received_by_recipient",
+          "precision": 0.6888888888888889,
+          "recall": 0.775,
+          "f1": 0.7294117647058822,
+          "support": 40
+        },
+        {
+          "category": "card_payment_not_recognised",
+          "precision": 0.7631578947368421,
+          "recall": 0.725,
+          "f1": 0.7435897435897436,
+          "support": 40
+        },
+        {
+          "category": "wrong_exchange_rate_for_cash_withdrawal",
+          "precision": 0.84375,
+          "recall": 0.675,
+          "f1": 0.75,
+          "support": 40
+        },
+        {
+          "category": "top_up_failed",
+          "precision": 0.7380952380952381,
+          "recall": 0.775,
+          "f1": 0.7560975609756099,
+          "support": 40
+        }
+      ],
+      "zero_f1_class_count": 0,
+      "classes_below_0_50_f1": 1,
+      "structured_output": {
+        "applicable": false,
+        "invalid_json_rate": null
+      }
+    },
+    "base_model": {
+      "total_errors": 2151,
+      "valid_label_classification_errors": 1437,
+      "invalid_or_disallowed_outputs": 714,
+      "top_confusions": [
+        {
+          "actual": "fiat_currency_support",
+          "predicted": "__invalid_or_disallowed__",
+          "count": 35,
+          "examples": [
+            {
+              "row_index": 240,
+              "text": "If I request that my funds be held, what currencies do you use?"
+            },
+            {
+              "row_index": 242,
+              "text": "Do you support all fiat currencies?"
+            },
+            {
+              "row_index": 243,
+              "text": "Does your system support multiple currency."
+            }
+          ]
+        },
+        {
+          "actual": "getting_virtual_card",
+          "predicted": "get_disposable_virtual_card",
+          "count": 31,
+          "examples": [
+            {
+              "row_index": 920,
+              "text": "Where can I obtain my virtual card?"
+            },
+            {
+              "row_index": 922,
+              "text": "Where can I find a virtual card?"
+            },
+            {
+              "row_index": 923,
+              "text": "Is there an option to have a virtual card?"
+            }
+          ]
+        },
+        {
+          "actual": "exchange_via_app",
+          "predicted": "__invalid_or_disallowed__",
+          "count": 30,
+          "examples": [
+            {
+              "row_index": 400,
+              "text": "May I exchange currencies with this?"
+            },
+            {
+              "row_index": 401,
+              "text": "Tell me how I can exchange between different currency."
+            },
+            {
+              "row_index": 402,
+              "text": "Can I change from one currency to another?"
+            }
+          ]
+        },
+        {
+          "actual": "age_limit",
+          "predicted": "__invalid_or_disallowed__",
+          "count": 28,
+          "examples": [
+            {
+              "row_index": 480,
+              "text": "how old do i need to be to get an account for myself"
+            },
+            {
+              "row_index": 481,
+              "text": "How young can I be to open my own account?"
+            },
+            {
+              "row_index": 482,
+              "text": "How old do I have to be?"
+            }
+          ]
+        },
+        {
+          "actual": "supported_cards_and_currencies",
+          "predicted": "__invalid_or_disallowed__",
+          "count": 28,
+          "examples": [
+            {
+              "row_index": 880,
+              "text": "To add money to my account, what currencies can I use?"
+            },
+            {
+              "row_index": 883,
+              "text": "What are the cards and currencies that are supported?"
+            },
+            {
+              "row_index": 884,
+              "text": "What currencies are accepted for adding money?"
+            }
+          ]
+        },
+        {
+          "actual": "card_delivery_estimate",
+          "predicted": "card_arrival",
+          "count": 27,
+          "examples": [
+            {
+              "row_index": 281,
+              "text": "my card was not in the mail again can you advise?"
+            },
+            {
+              "row_index": 284,
+              "text": "I'm just wondering when my card will get here."
+            },
+            {
+              "row_index": 285,
+              "text": "Can you get me my card fast?"
+            }
+          ]
+        },
+        {
+          "actual": "failed_transfer",
+          "predicted": "transfer_fee_charged",
+          "count": 26,
+          "examples": [
+            {
+              "row_index": 2280,
+              "text": "dont understand why transfer failed"
+            },
+            {
+              "row_index": 2282,
+              "text": "My transfer didn't work"
+            },
+            {
+              "row_index": 2283,
+              "text": "Fix your system. I can't make transfers, I've tried like 5 times already."
+            }
+          ]
+        },
+        {
+          "actual": "card_acceptance",
+          "predicted": "supported_cards_and_currencies",
+          "count": 25,
+          "examples": [
+            {
+              "row_index": 960,
+              "text": "Will my card be accepted all over the world?"
+            },
+            {
+              "row_index": 961,
+              "text": "Who accepts this card?"
+            },
+            {
+              "row_index": 962,
+              "text": "Can I use my card for payment all over the world?"
+            }
+          ]
+        },
+        {
+          "actual": "card_payment_wrong_exchange_rate",
+          "predicted": "wrong_exchange_rate_for_cash_withdrawal",
+          "count": 25,
+          "examples": [
+            {
+              "row_index": 120,
+              "text": "I purchased something in a foreign currency but the rate applied is wrong"
+            },
+            {
+              "row_index": 122,
+              "text": "the card payment exchange rate is wrong"
+            },
+            {
+              "row_index": 123,
+              "text": "The exchange rate was wrong when I bought something outside the country."
+            }
+          ]
+        },
+        {
+          "actual": "getting_spare_card",
+          "predicted": "get_disposable_virtual_card",
+          "count": 25,
+          "examples": [
+            {
+              "row_index": 2400,
+              "text": "Would it be possible to get another card?"
+            },
+            {
+              "row_index": 2402,
+              "text": "I want to order another crad"
+            },
+            {
+              "row_index": 2405,
+              "text": "I need some spare physical cards."
+            }
+          ]
+        },
+        {
+          "actual": "pending_top_up",
+          "predicted": "top_up_failed",
+          "count": 25,
+          "examples": [
+            {
+              "row_index": 641,
+              "text": "My card was topped this morning but I can't see the funds. Why didn't it complete?"
+            },
+            {
+              "row_index": 643,
+              "text": "there's a delay in my top-up"
+            },
+            {
+              "row_index": 644,
+              "text": "Is there a reason my top up hasn't gone through"
+            }
+          ]
+        },
+        {
+          "actual": "visa_or_mastercard",
+          "predicted": "supported_cards_and_currencies",
+          "count": 25,
+          "examples": [
+            {
+              "row_index": 1280,
+              "text": "I like to Mastercard rather than Visa."
+            },
+            {
+              "row_index": 1281,
+              "text": "Do I qualify for a visa card?"
+            },
+            {
+              "row_index": 1283,
+              "text": "Do you guys accept Visa or Mastercard?"
+            }
+          ]
+        },
+        {
+          "actual": "disposable_card_limits",
+          "predicted": "__invalid_or_disallowed__",
+          "count": 24,
+          "examples": [
+            {
+              "row_index": 1360,
+              "text": "How can i get multiple disposble cards."
+            },
+            {
+              "row_index": 1363,
+              "text": "How do I make more than one disposable card in a day?"
+            },
+            {
+              "row_index": 1365,
+              "text": "what is the disposable cards limit?"
+            }
+          ]
+        },
+        {
+          "actual": "transfer_not_received_by_recipient",
+          "predicted": "pending_transfer",
+          "count": 24,
+          "examples": [
+            {
+              "row_index": 841,
+              "text": "My money transfer has not arrived."
+            },
+            {
+              "row_index": 842,
+              "text": "I am still waiting for a transaction to be completed"
+            },
+            {
+              "row_index": 843,
+              "text": "I made a money transaction but the recipient can't see it"
+            }
+          ]
+        },
+        {
+          "actual": "verify_my_identity",
+          "predicted": "__invalid_or_disallowed__",
+          "count": 23,
+          "examples": [
+            {
+              "row_index": 3001,
+              "text": "What do you need to verify my identity?"
+            },
+            {
+              "row_index": 3003,
+              "text": "How can I verify my indentity?"
+            },
+            {
+              "row_index": 3004,
+              "text": "What is needed to prove my identity?"
+            }
+          ]
+        }
+      ],
+      "lowest_f1_classes": [
+        {
+          "category": "card_delivery_estimate",
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 40
+        },
+        {
+          "category": "card_payment_wrong_exchange_rate",
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 40
+        },
+        {
+          "category": "card_swallowed",
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 40
+        },
+        {
+          "category": "exchange_via_app",
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 40
+        },
+        {
+          "category": "failed_transfer",
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 40
+        },
+        {
+          "category": "fiat_currency_support",
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 40
+        },
+        {
+          "category": "get_physical_card",
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 40
+        },
+        {
+          "category": "getting_spare_card",
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 40
+        },
+        {
+          "category": "getting_virtual_card",
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 40
+        },
+        {
+          "category": "order_physical_card",
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 40
+        }
+      ],
+      "zero_f1_class_count": 13,
+      "classes_below_0_50_f1": 58,
+      "structured_output": {
+        "json_valid": 2489,
+        "json_invalid": 591,
+        "invalid_json_rate": 0.19188311688311688,
+        "schema_valid": 2416,
+        "schema_invalid": 664,
+        "invalid_schema_rate": 0.21558441558441557,
+        "allowed_label_valid": 2366,
+        "allowed_label_invalid": 714,
+        "invalid_allowed_label_rate": 0.2318181818181818
+      }
+    },
+    "lora_adapter": {
+      "total_errors": 601,
+      "valid_label_classification_errors": 593,
+      "invalid_or_disallowed_outputs": 8,
+      "top_confusions": [
+        {
+          "actual": "top_up_failed",
+          "predicted": "topping_up_by_card",
+          "count": 29,
+          "examples": [
+            {
+              "row_index": 2640,
+              "text": "The app denied my topped up."
+            },
+            {
+              "row_index": 2641,
+              "text": "Heyy I tried to top up with my card today but it failed! I just got the couple days before but it has worked last time. What's going on, can you double check please?"
+            },
+            {
+              "row_index": 2642,
+              "text": "I have a top up that didn't go through.  Why?"
+            }
+          ]
+        },
+        {
+          "actual": "top_up_limits",
+          "predicted": "topping_up_by_card",
+          "count": 26,
+          "examples": [
+            {
+              "row_index": 720,
+              "text": "can you limit my top up?"
+            },
+            {
+              "row_index": 721,
+              "text": "Am I free to top-up as much as I want?"
+            },
+            {
+              "row_index": 724,
+              "text": "How much money can i top up?"
+            }
+          ]
+        },
+        {
+          "actual": "card_swallowed",
+          "predicted": "cash_withdrawal_not_recognised",
+          "count": 23,
+          "examples": [
+            {
+              "row_index": 1920,
+              "text": "What do I do if an ATM \"stole\" my card?"
+            },
+            {
+              "row_index": 1922,
+              "text": "I was retrieving money and my card wouldn't remove."
+            },
+            {
+              "row_index": 1924,
+              "text": "HOw do I get my card back after the ATM has pulled it in?"
+            }
+          ]
+        },
+        {
+          "actual": "pin_blocked",
+          "predicted": "change_pin",
+          "count": 16,
+          "examples": [
+            {
+              "row_index": 522,
+              "text": "Will you reinstate my PIN?"
+            },
+            {
+              "row_index": 523,
+              "text": "I accidentally blocked my PIN. How do I reset it?"
+            },
+            {
+              "row_index": 524,
+              "text": "How do I unblock my pin after entering it wrong too many times?"
+            }
+          ]
+        },
+        {
+          "actual": "transfer_not_received_by_recipient",
+          "predicted": "pending_transfer",
+          "count": 15,
+          "examples": [
+            {
+              "row_index": 841,
+              "text": "My money transfer has not arrived."
+            },
+            {
+              "row_index": 842,
+              "text": "I am still waiting for a transaction to be completed"
+            },
+            {
+              "row_index": 848,
+              "text": "The transfer I did hasn't arrived"
+            }
+          ]
+        },
+        {
+          "actual": "card_delivery_estimate",
+          "predicted": "card_arrival",
+          "count": 14,
+          "examples": [
+            {
+              "row_index": 280,
+              "text": "I need my card now!"
+            },
+            {
+              "row_index": 281,
+              "text": "my card was not in the mail again can you advise?"
+            },
+            {
+              "row_index": 284,
+              "text": "I'm just wondering when my card will get here."
+            }
+          ]
+        },
+        {
+          "actual": "top_up_by_card_charge",
+          "predicted": "topping_up_by_card",
+          "count": 12,
+          "examples": [
+            {
+              "row_index": 2802,
+              "text": "i was charged when i used a us issued card. why and what cards are free to use to add money"
+            },
+            {
+              "row_index": 2803,
+              "text": "Any hidden fees associated with the international card if money is added?"
+            },
+            {
+              "row_index": 2804,
+              "text": "Will I get charged for topping off my card?"
+            }
+          ]
+        },
+        {
+          "actual": "top_up_reverted",
+          "predicted": "topping_up_by_card",
+          "count": 12,
+          "examples": [
+            {
+              "row_index": 1006,
+              "text": "The app wouldn't accept my top up."
+            },
+            {
+              "row_index": 1007,
+              "text": "I topped up my account and even though it was confirmed at first, the money isn't there anymore! why did this happen, and where did my money go?"
+            },
+            {
+              "row_index": 1008,
+              "text": "I believe my money did not go through with my top up, was there a problem on your end?"
+            }
+          ]
+        },
+        {
+          "actual": "balance_not_updated_after_bank_transfer",
+          "predicted": "pending_transfer",
+          "count": 11,
+          "examples": [
+            {
+              "row_index": 2680,
+              "text": "I made a transfer a few hours ago from a UK banking account.  I do not yet see the transfer.  Please check on this for me."
+            },
+            {
+              "row_index": 2682,
+              "text": "How long will it take for my transferred money to show up?"
+            },
+            {
+              "row_index": 2686,
+              "text": "The amount of time that transfers usually take from a UK account is what?I just completed a transfer and it is not showing up at all. I'm wondering at this point if everything is actually okay."
+            }
+          ]
+        },
+        {
+          "actual": "fiat_currency_support",
+          "predicted": "exchange_via_app",
+          "count": 10,
+          "examples": [
+            {
+              "row_index": 247,
+              "text": "What currencies do you do exchanges for?"
+            },
+            {
+              "row_index": 250,
+              "text": "Where can I exchange my money for EUR?"
+            },
+            {
+              "row_index": 255,
+              "text": "How do I change currencies to euros?"
+            }
+          ]
+        },
+        {
+          "actual": "top_up_by_bank_transfer_charge",
+          "predicted": "transfer_fee_charged",
+          "count": 9,
+          "examples": [
+            {
+              "row_index": 600,
+              "text": "how much do you charge to accept transfers"
+            },
+            {
+              "row_index": 601,
+              "text": "I would like to make a transfer. How much does it cost?"
+            },
+            {
+              "row_index": 602,
+              "text": "I need to make a transfer, what will the fee be?"
+            }
+          ]
+        },
+        {
+          "actual": "top_up_by_cash_or_cheque",
+          "predicted": "topping_up_by_card",
+          "count": 9,
+          "examples": [
+            {
+              "row_index": 2449,
+              "text": "I'd like to use cash to top up. How do I find that option?"
+            },
+            {
+              "row_index": 2456,
+              "text": "I need to top up cash, How do I do it?"
+            },
+            {
+              "row_index": 2458,
+              "text": "What locations can I top up with cash?"
+            }
+          ]
+        },
+        {
+          "actual": "card_payment_not_recognised",
+          "predicted": "direct_debit_payment_not_recognised",
+          "count": 8,
+          "examples": [
+            {
+              "row_index": 1088,
+              "text": "there is a transaction on my account that i didnt make"
+            },
+            {
+              "row_index": 1093,
+              "text": "Why would there be a payment on my account I don't recognize?"
+            },
+            {
+              "row_index": 1096,
+              "text": "Can you freeze my account?  I just saw there are transactions on my account that I don't recognize.  How can I fix this?"
+            }
+          ]
+        },
+        {
+          "actual": "declined_transfer",
+          "predicted": "declined_card_payment",
+          "count": 8,
+          "examples": [
+            {
+              "row_index": 1721,
+              "text": "Good morning. I tried to make a purchase with my credit card last night and again this morning. Both times it was declined. Can you investigate?"
+            },
+            {
+              "row_index": 1726,
+              "text": "How can I fix my card, it got declined twice."
+            },
+            {
+              "row_index": 1728,
+              "text": "My transfers are being declined. IT has always worked for me but now it's declining my card. I've tried several times."
+            }
+          ]
+        },
+        {
+          "actual": "top_up_by_bank_transfer_charge",
+          "predicted": "transfer_into_account",
+          "count": 8,
+          "examples": [
+            {
+              "row_index": 604,
+              "text": "Can I also transfer with SWIFT?"
+            },
+            {
+              "row_index": 605,
+              "text": "Are SWIFT transfers accepted?"
+            },
+            {
+              "row_index": 609,
+              "text": "Is it possible to get a transfer from SWIFT?"
+            }
+          ]
+        }
+      ],
+      "lowest_f1_classes": [
+        {
+          "category": "top_up_failed",
+          "precision": 1.0,
+          "recall": 0.175,
+          "f1": 0.2978723404255319,
+          "support": 40
+        },
+        {
+          "category": "topping_up_by_card",
+          "precision": 0.21705426356589147,
+          "recall": 0.7,
+          "f1": 0.33136094674556216,
+          "support": 40
+        },
+        {
+          "category": "card_swallowed",
+          "precision": 1.0,
+          "recall": 0.275,
+          "f1": 0.4313725490196079,
+          "support": 40
+        },
+        {
+          "category": "transfer_not_received_by_recipient",
+          "precision": 0.6818181818181818,
+          "recall": 0.375,
+          "f1": 0.48387096774193555,
+          "support": 40
+        },
+        {
+          "category": "top_up_limits",
+          "precision": 1.0,
+          "recall": 0.35,
+          "f1": 0.5185185185185185,
+          "support": 40
+        },
+        {
+          "category": "top_up_by_bank_transfer_charge",
+          "precision": 0.8095238095238095,
+          "recall": 0.425,
+          "f1": 0.5573770491803278,
+          "support": 40
+        },
+        {
+          "category": "balance_not_updated_after_bank_transfer",
+          "precision": 0.6896551724137931,
+          "recall": 0.5,
+          "f1": 0.5797101449275363,
+          "support": 40
+        },
+        {
+          "category": "pin_blocked",
+          "precision": 0.9444444444444444,
+          "recall": 0.425,
+          "f1": 0.5862068965517241,
+          "support": 40
+        },
+        {
+          "category": "cash_withdrawal_not_recognised",
+          "precision": 0.45569620253164556,
+          "recall": 0.9,
+          "f1": 0.6050420168067226,
+          "support": 40
+        },
+        {
+          "category": "card_payment_not_recognised",
+          "precision": 0.8636363636363636,
+          "recall": 0.475,
+          "f1": 0.6129032258064516,
+          "support": 40
+        }
+      ],
+      "zero_f1_class_count": 0,
+      "classes_below_0_50_f1": 4,
+      "structured_output": {
+        "json_valid": 3080,
+        "json_invalid": 0,
+        "invalid_json_rate": 0.0,
+        "schema_valid": 3080,
+        "schema_invalid": 0,
+        "invalid_schema_rate": 0.0,
+        "allowed_label_valid": 3072,
+        "allowed_label_invalid": 8,
+        "invalid_allowed_label_rate": 0.0025974025974025974
+      }
+    }
+  },
+  "correctness_overlap": {
+    "tfidf_logreg_vs_lora_adapter": {
+      "both_correct": 2224,
+      "left_only_correct": 384,
+      "right_only_correct": 255,
+      "both_incorrect": 217
+    },
+    "lora_adapter_vs_base_model": {
+      "both_correct": 836,
+      "left_only_correct": 1643,
+      "right_only_correct": 93,
+      "both_incorrect": 508
+    }
+  },
+  "adapter_vs_tfidf_per_class": {
+    "left_better_classes": 29,
+    "right_better_classes": 48,
+    "tied_classes": 0,
+    "largest_left_advantages": [
+      {
+        "category": "virtual_card_not_working",
+        "left_f1": 0.8,
+        "right_f1": 0.4905660377358491,
+        "difference": 0.30943396226415093
+      },
+      {
+        "category": "card_not_working",
+        "left_f1": 0.8684210526315789,
+        "right_f1": 0.6736842105263158,
+        "difference": 0.1947368421052631
+      },
+      {
+        "category": "get_disposable_virtual_card",
+        "left_f1": 0.8717948717948718,
+        "right_f1": 0.6829268292682926,
+        "difference": 0.18886804252657918
+      },
+      {
+        "category": "contactless_not_working",
+        "left_f1": 0.9367088607594937,
+        "right_f1": 0.7692307692307693,
+        "difference": 0.1674780915287244
+      },
+      {
+        "category": "card_acceptance",
+        "left_f1": 0.9189189189189189,
+        "right_f1": 0.7887323943661972,
+        "difference": 0.13018652455272162
+      },
+      {
+        "category": "atm_support",
+        "left_f1": 0.9302325581395349,
+        "right_f1": 0.8157894736842106,
+        "difference": 0.11444308445532425
+      },
+      {
+        "category": "getting_virtual_card",
+        "left_f1": 0.8837209302325583,
+        "right_f1": 0.7835051546391752,
+        "difference": 0.10021577559338302
+      },
+      {
+        "category": "wrong_exchange_rate_for_cash_withdrawal",
+        "left_f1": 0.8395061728395061,
+        "right_f1": 0.75,
+        "difference": 0.08950617283950613
+      },
+      {
+        "category": "balance_not_updated_after_cheque_or_cash_deposit",
+        "left_f1": 0.935064935064935,
+        "right_f1": 0.8539325842696629,
+        "difference": 0.08113235079527215
+      },
+      {
+        "category": "terminate_account",
+        "left_f1": 0.975609756097561,
+        "right_f1": 0.9090909090909091,
+        "difference": 0.0665188470066519
+      }
+    ],
+    "largest_right_advantages": [
+      {
+        "category": "top_up_failed",
+        "left_f1": 0.2978723404255319,
+        "right_f1": 0.7560975609756099,
+        "difference": -0.45822522055007797
+      },
+      {
+        "category": "card_swallowed",
+        "left_f1": 0.4313725490196079,
+        "right_f1": 0.8571428571428571,
+        "difference": -0.4257703081232492
+      },
+      {
+        "category": "top_up_limits",
+        "left_f1": 0.5185185185185185,
+        "right_f1": 0.9047619047619048,
+        "difference": -0.3862433862433863
+      },
+      {
+        "category": "topping_up_by_card",
+        "left_f1": 0.33136094674556216,
+        "right_f1": 0.7142857142857143,
+        "difference": -0.38292476754015214
+      },
+      {
+        "category": "pin_blocked",
+        "left_f1": 0.5862068965517241,
+        "right_f1": 0.888888888888889,
+        "difference": -0.30268199233716486
+      },
+      {
+        "category": "transfer_not_received_by_recipient",
+        "left_f1": 0.48387096774193555,
+        "right_f1": 0.7294117647058822,
+        "difference": -0.24554079696394665
+      },
+      {
+        "category": "top_up_by_bank_transfer_charge",
+        "left_f1": 0.5573770491803278,
+        "right_f1": 0.7887323943661972,
+        "difference": -0.23135534518586942
+      },
+      {
+        "category": "cash_withdrawal_not_recognised",
+        "left_f1": 0.6050420168067226,
+        "right_f1": 0.7848101265822786,
+        "difference": -0.1797681097755559
+      },
+      {
+        "category": "change_pin",
+        "left_f1": 0.8041237113402062,
+        "right_f1": 0.9743589743589743,
+        "difference": -0.17023526301876812
+      },
+      {
+        "category": "top_up_by_card_charge",
+        "left_f1": 0.75,
+        "right_f1": 0.9135802469135802,
+        "difference": -0.1635802469135802
+      }
+    ]
+  },
+  "artifacts": {
+    "machine_readable": "reports/test_error_analysis.json",
+    "human_readable": "reports/test_error_analysis.md"
+  }
+}
