@@ -126,6 +126,12 @@ def classification_metrics(
 
     return {
         "accuracy": correct / len(expected),
+        "macro_precision": sum(
+            float(values["precision"]) for values in per_class.values()
+        )
+        / len(labels),
+        "macro_recall": sum(float(values["recall"]) for values in per_class.values())
+        / len(labels),
         "macro_f1": sum(float(values["f1"]) for values in per_class.values())
         / len(labels),
         "correct": correct,

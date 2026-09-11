@@ -1,0 +1,77 @@
+{
+  "evaluation": "final_test_comparison",
+  "stage": "phase_4_stage_1",
+  "first_reserved_test_evaluation": true,
+  "test_records": 3080,
+  "number_of_classes": 77,
+  "test_sha256": "4b4d9b84fb8c4d2c5c542d320fadee845d6a3f7797e4ff7a0161c326c43e9511",
+  "approaches": [
+    {
+      "id": "majority",
+      "name": "Majority class",
+      "report": "reports/majority_test.json",
+      "accuracy": 0.012987012987012988,
+      "macro_precision": 0.000168662506324844,
+      "macro_recall": 0.012987012987012988,
+      "macro_f1": 0.00033300033300033305,
+      "correct": 40,
+      "invalid_json_rate": null,
+      "invalid_allowed_label_rate": null
+    },
+    {
+      "id": "tfidf_logreg",
+      "name": "TF-IDF + logistic regression",
+      "report": "reports/tfidf_logreg_test.json",
+      "accuracy": 0.8467532467532467,
+      "macro_precision": 0.8585638226795645,
+      "macro_recall": 0.8467532467532468,
+      "macro_f1": 0.8454445661816897,
+      "correct": 2608,
+      "invalid_json_rate": null,
+      "invalid_allowed_label_rate": null
+    },
+    {
+      "id": "base_model",
+      "name": "Unchanged base model",
+      "report": "reports/base_model_test.json",
+      "accuracy": 0.3016233766233766,
+      "macro_precision": 0.5025036743748936,
+      "macro_recall": 0.3016233766233766,
+      "macro_f1": 0.30765477726698487,
+      "correct": 929,
+      "invalid_json_rate": 0.19188311688311688,
+      "invalid_allowed_label_rate": 0.2318181818181818
+    },
+    {
+      "id": "lora_adapter",
+      "name": "Saved LoRA adapter",
+      "report": "reports/lora_adapter_test.json",
+      "accuracy": 0.8048701298701298,
+      "macro_precision": 0.8482112325808493,
+      "macro_recall": 0.8048701298701298,
+      "macro_f1": 0.804990809472458,
+      "correct": 2479,
+      "invalid_json_rate": 0.0,
+      "invalid_allowed_label_rate": 0.0025974025974025974
+    }
+  ],
+  "ranking_by_macro_f1": [
+    "tfidf_logreg",
+    "lora_adapter",
+    "base_model",
+    "majority"
+  ],
+  "comparisons": {
+    "adapter_minus_base_accuracy": 0.5032467532467533,
+    "adapter_minus_base_macro_f1": 0.4973360322054732,
+    "adapter_minus_tfidf_accuracy": -0.041883116883116855,
+    "adapter_minus_tfidf_macro_f1": -0.04045375670923168,
+    "adapter_minus_base_invalid_json_rate": -0.19188311688311688
+  },
+  "validation": {
+    "detailed_reports": 4,
+    "prediction_rows_per_approach": 3080,
+    "confusion_matrix_total_per_approach": 3080,
+    "per_class_entries_per_approach": 77
+  }
+}

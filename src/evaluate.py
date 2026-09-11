@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
-"""Evaluate an unchanged instruction-tuned model on validation data."""
+"""Evaluate a base model or saved adapter with strict structured-output scoring."""
 
 from __future__ import annotations
 
 import argparse
 import csv
+import fcntl
 import hashlib
 import json
 import time
 from collections import Counter
+from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
 
@@ -16,27 +18,45 @@ from train_baseline import classification_metrics, portable_path, sha256_file
 
 
 DEFAULT_MODEL = "Qwen/Qwen2.5-1.5B-Instruct"
+DEFAULT_MODEL_REVISION = "989aa7980e4cf806f80c7fef2b1adb7bc71aa306"
+
+
+@contextmanager
+def output_lock(output_file: Path):
+    """Prevent two evaluation processes from appending to one checkpoint."""
+    lock_path = output_file.with_suffix(output_file.suffix + ".lock")
+    lock_path.parent.mkdir(parents=True, exist_ok=True)
+    with lock_path.open("w", encoding="utf-8") as handle:
+        try:
+            fcntl.flock(handle, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError as error:
+            raise RuntimeError(f"evaluation already writes to {output_file}") from error
+        yield
 
 
 def parse_args() -> argparse.Namespace:
     project_root = Path(__file__).resolve().parents[1]
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--model", default=DEFAULT_MODEL)
+    parser.add_argument("--model-revision", default=DEFAULT_MODEL_REVISION)
     parser.add_argument(
+        "--data-file",
         "--validation-file",
+        dest="data_file",
         type=Path,
         default=project_root / "data" / "processed" / "validation.csv",
     )
+    parser.add_argument("--split", choices=("validation", "test"), default="validation")
+    parser.add_argument("--adapter-dir", type=Path)
     parser.add_argument(
         "--output-file",
         type=Path,
-        default=project_root / "reports" / "base_model_validation_outputs.jsonl",
     )
     parser.add_argument(
         "--report-file",
         type=Path,
-        default=project_root / "reports" / "base_model_validation.json",
     )
+    parser.add_argument("--confusion-matrix-file", type=Path)
     parser.add_argument(
         "--cache-dir",
         type=Path,
@@ -50,7 +70,17 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Discard an existing output checkpoint instead of resuming it.",
     )
-    return parser.parse_args()
+    args = parser.parse_args()
+    variant = "lora_adapter" if args.adapter_dir else "base_model"
+    if args.output_file is None:
+        args.output_file = project_root / "reports" / f"{variant}_{args.split}_outputs.jsonl"
+    if args.report_file is None:
+        args.report_file = project_root / "reports" / f"{variant}_{args.split}.json"
+    if args.confusion_matrix_file is None:
+        args.confusion_matrix_file = (
+            project_root / "reports" / f"{variant}_{args.split}_confusion_matrix.csv"
+        )
+    return args
 
 
 def load_validation(path: Path, limit: int | None) -> list[dict[str, str]]:
@@ -140,14 +170,20 @@ def generate_outputs(args: argparse.Namespace) -> tuple[list[dict[str, Any]], di
     from transformers import AutoModelForCausalLM, AutoTokenizer
 
     project_root = Path(__file__).resolve().parents[1]
-    validation = load_validation(args.validation_file, args.limit)
-    labels = sorted({row["category"] for row in validation})
+    records = load_validation(args.data_file, args.limit)
+    labels = sorted({row["category"] for row in records})
     if args.limit is not None and len(labels) != 77:
-        full_validation = load_validation(args.validation_file, None)
-        labels = sorted({row["category"] for row in full_validation})
+        full_records = load_validation(args.data_file, None)
+        labels = sorted({row["category"] for row in full_records})
     allowed_labels = set(labels)
     system_prompt = build_system_prompt(labels)
     current_prompt_hash = prompt_hash(system_prompt)
+    variant = "lora_adapter" if args.adapter_dir else "base_model"
+    adapter_sha256 = (
+        sha256_file(args.adapter_dir / "adapter_model.safetensors")
+        if args.adapter_dir
+        else None
+    )
 
     args.output_file.parent.mkdir(parents=True, exist_ok=True)
     args.cache_dir.mkdir(parents=True, exist_ok=True)
@@ -155,29 +191,38 @@ def generate_outputs(args: argparse.Namespace) -> tuple[list[dict[str, Any]], di
         args.output_file.unlink()
     completed = load_checkpoint(args.output_file)
     resumed_rows = len(completed)
-    if len(completed) > len(validation):
+    if len(completed) > len(records):
         raise ValueError("checkpoint contains more rows than this evaluation")
     for index, row in enumerate(completed):
         if (
             row.get("model") != args.model
+            or row.get("model_revision") != args.model_revision
+            or row.get("variant", "base_model") != variant
+            or row.get("adapter_sha256") != adapter_sha256
             or row.get("prompt_sha256") != current_prompt_hash
-            or row.get("text") != validation[index]["text"]
-            or row.get("actual_category") != validation[index]["category"]
+            or row.get("text") != records[index]["text"]
+            or row.get("actual_category") != records[index]["category"]
         ):
             raise ValueError("checkpoint does not match the requested evaluation")
 
     device, dtype = choose_device(torch)
     load_started = time.perf_counter()
-    tokenizer = AutoTokenizer.from_pretrained(args.model, cache_dir=args.cache_dir)
+    tokenizer_source = args.adapter_dir if args.adapter_dir else args.model
+    tokenizer = AutoTokenizer.from_pretrained(tokenizer_source, cache_dir=args.cache_dir)
     tokenizer.padding_side = "left"
     if tokenizer.pad_token_id is None:
         tokenizer.pad_token = tokenizer.eos_token
     model = AutoModelForCausalLM.from_pretrained(
         args.model,
+        revision=args.model_revision,
         cache_dir=args.cache_dir,
         dtype=dtype,
         low_cpu_mem_usage=True,
     )
+    if args.adapter_dir:
+        from peft import PeftModel
+
+        model = PeftModel.from_pretrained(model, args.adapter_dir)
     model.to(device)
     model.eval()
     model_load_seconds = time.perf_counter() - load_started
@@ -185,8 +230,8 @@ def generate_outputs(args: argparse.Namespace) -> tuple[list[dict[str, Any]], di
 
     generation_seconds = 0.0
     with args.output_file.open("a", encoding="utf-8") as output_handle:
-        for start in range(len(completed), len(validation), args.batch_size):
-            batch = validation[start : start + args.batch_size]
+        for start in range(len(completed), len(records), args.batch_size):
+            batch = records[start : start + args.batch_size]
             conversations = [
                 [
                     {"role": "system", "content": system_prompt},
@@ -215,6 +260,8 @@ def generate_outputs(args: argparse.Namespace) -> tuple[list[dict[str, Any]], di
                 row = {
                     "row_index": start + offset,
                     "model": args.model,
+                    "variant": variant,
+                    "adapter_sha256": adapter_sha256,
                     "model_revision": model_revision,
                     "prompt_sha256": current_prompt_hash,
                     "text": source["text"],
@@ -227,7 +274,7 @@ def generate_outputs(args: argparse.Namespace) -> tuple[list[dict[str, Any]], di
                 output_handle.write(json.dumps(row, ensure_ascii=False) + "\n")
                 completed.append(row)
             output_handle.flush()
-            print(f"completed {len(completed)}/{len(validation)}", flush=True)
+            print(f"completed {len(completed)}/{len(records)}", flush=True)
 
     runtime = {
         "device": device,
@@ -243,18 +290,27 @@ def generate_outputs(args: argparse.Namespace) -> tuple[list[dict[str, Any]], di
         "model_revision": model_revision,
         "model_parameters_reported": "1.54B",
         "model_license": "Apache-2.0",
-        "weights_modified": False,
+        "adapter_loaded": bool(args.adapter_dir),
+        "adapter_directory": (
+            portable_path(args.adapter_dir, project_root) if args.adapter_dir else None
+        ),
+        "adapter_sha256": adapter_sha256,
         "prompt_sha256": current_prompt_hash,
         "prompt": system_prompt,
         "batch_size": args.batch_size,
         "max_new_tokens": args.max_new_tokens,
         "do_sample": False,
         "parsing": "json.loads on the complete raw output; no extraction or cleanup",
-        "validation_file": portable_path(args.validation_file, project_root),
-        "validation_sha256": sha256_file(args.validation_file),
+        "data_split": args.split,
+        "data_file": portable_path(args.data_file, project_root),
+        "data_sha256": sha256_file(args.data_file),
         "output_file": portable_path(args.output_file, project_root),
     }
-    return completed, {"runtime": runtime, "configuration": configuration}
+    return completed, {
+        "evaluation": f"{variant}_{args.split}",
+        "runtime": runtime,
+        "configuration": configuration,
+    }
 
 
 def build_report(
@@ -273,7 +329,7 @@ def build_report(
     label_valid = sum(bool(row["label_valid"]) for row in rows)
     predicted_counts = Counter(predictions)
     return {
-        "evaluation": "unchanged_base_model_validation",
+        "evaluation": metadata.pop("evaluation"),
         "target": "category",
         "records": total,
         **metadata,
@@ -293,15 +349,50 @@ def build_report(
     }
 
 
+def write_confusion_matrix(path: Path, rows: list[dict[str, Any]]) -> None:
+    actual_labels = sorted({row["actual_category"] for row in rows})
+    valid_predictions = {
+        row["predicted_category"] for row in rows if row["label_valid"]
+    }
+    predicted_labels = [
+        *sorted(set(actual_labels) | valid_predictions),
+        "__invalid_output__",
+    ]
+    actual_positions = {label: index for index, label in enumerate(actual_labels)}
+    predicted_positions = {label: index for index, label in enumerate(predicted_labels)}
+    matrix = [[0 for _ in predicted_labels] for _ in actual_labels]
+    for row in rows:
+        prediction = (
+            row["predicted_category"] if row["label_valid"] else "__invalid_output__"
+        )
+        matrix[actual_positions[row["actual_category"]]][predicted_positions[prediction]] += 1
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.writer(handle, lineterminator="\n")
+        writer.writerow(["actual\\predicted", *predicted_labels])
+        for label, counts in zip(actual_labels, matrix):
+            writer.writerow([label, *counts])
+
+
 def main() -> None:
     args = parse_args()
-    rows, metadata = generate_outputs(args)
+    with output_lock(args.output_file):
+        rows, metadata = generate_outputs(args)
     report = build_report(rows, metadata)
+    write_confusion_matrix(args.confusion_matrix_file, rows)
+    report["artifacts"] = {
+        "raw_outputs_file": portable_path(args.output_file, Path(__file__).resolve().parents[1]),
+        "confusion_matrix_file": portable_path(
+            args.confusion_matrix_file, Path(__file__).resolve().parents[1]
+        ),
+    }
     args.report_file.parent.mkdir(parents=True, exist_ok=True)
     args.report_file.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     summary = {
         "records": report["records"],
         "accuracy": report["metrics"]["accuracy"],
+        "macro_precision": report["metrics"]["macro_precision"],
+        "macro_recall": report["metrics"]["macro_recall"],
         "macro_f1": report["metrics"]["macro_f1"],
         **report["structured_output"],
     }

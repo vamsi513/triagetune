@@ -6,7 +6,7 @@ The project is developed in checkpoints. Measurements are recorded only after th
 
 ## Current status
 
-Phases 1 and 2 and adapter training are complete. The response-only adapter is saved locally with measured training and validation losses. Final test evaluation and serving have not started.
+Phases 1 through 3 and the first final-evaluation stage are complete. The reserved test split has been scored once with all four approaches. Confidence intervals, error analysis, robustness checks, and serving have not started.
 
 ## Dataset
 
@@ -148,6 +148,28 @@ The completed run stopped after 251 optimizer steps because of the wall-clock gu
 The tracked runtime was 3 hours, 41 minutes because the full validation pass began before the three-hour boundary and was allowed to complete. The adapter contains no complete base-model weight file.
 
 Local experiment data is stored under `mlruns/`, the resumable checkpoint under `checkpoints/`, and the final adapter under `artifacts/lora_adapter/`. Those runtime artifacts are excluded from version control. The reproducible configuration, measured losses, runtime, and adapter file hashes are recorded in `reports/lora_training.json`; the tracked loss history is in `reports/lora_training_history.json`.
+
+## Final test evaluation: Stage 1
+
+The untouched 3,080-record test split was evaluated for the first time after training. All approaches used the same test-file fingerprint. Invalid or disallowed structured outputs count as incorrect; structured-output rates do not apply to the two classical classifiers.
+
+| Approach | Accuracy | Macro precision | Macro recall | Macro F1 | Invalid JSON |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Majority class | 0.012987 | 0.000169 | 0.012987 | 0.000333 | N/A |
+| TF-IDF + logistic regression | 0.846753 | 0.858564 | 0.846753 | 0.845445 | N/A |
+| Unchanged base model | 0.301623 | 0.502504 | 0.301623 | 0.307655 | 0.191883 |
+| Saved LoRA adapter | 0.804870 | 0.848211 | 0.804870 | 0.804991 | 0.000000 |
+
+The adapter improves accuracy over the unchanged base model by 0.503247 and macro F1 by 0.497336. It also reduces invalid JSON from 591 outputs to zero. However, the frozen TF-IDF baseline remains strongest at this checkpoint, exceeding the adapter by 0.041883 accuracy and 0.040454 macro F1. The adapter produced eight valid objects whose category was outside the allowed set; these still count as incorrect.
+
+Detailed reports contain all 77 per-class precision, recall, F1, and support values. Each approach also has a complete prediction record and confusion matrix. `reports/final_test_evaluation.json` is the validated combined comparison.
+
+Rebuild the classical test reports and then the validated comparison with:
+
+```bash
+python src/evaluate_classical.py
+python src/summarize_test_evaluation.py
+```
 
 ## Routing outputs
 
