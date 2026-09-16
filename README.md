@@ -6,7 +6,7 @@ The project is developed in checkpoints. Measurements are recorded only after th
 
 ## Current status
 
-Phases 1 through 3 and the first two final-evaluation stages are complete. The reserved test split has been scored once with all four approaches, followed by confidence intervals and error analysis using the saved predictions. Robustness checks and serving have not started.
+Phases 1 through 4 are complete. The reserved test split has been scored once with all four approaches, followed by confidence intervals, error analysis, and a diagnostic robustness evaluation. Serving has not started.
 
 ## Dataset
 
@@ -194,6 +194,27 @@ Reproduce Stage 2 from the saved predictions with:
 python src/analyze_test_results.py
 ```
 
+## Final test evaluation: Stage 3
+
+Robustness was checked with 32 project-created synthetic probes: eight short, eight long, eight ambiguous, and eight out-of-scope requests. This is a small diagnostic suite, not a production benchmark. No retraining occurred. Ambiguous probes use documented sets of plausible categories instead of invented single ground-truth labels, and out-of-scope probes have no valid target among the 77 categories.
+
+| Input group | Measurement | TF-IDF | Saved adapter |
+| --- | --- | ---: | ---: |
+| Short | Exact category | 7/8 | 8/8 |
+| Long | Exact category | 6/8 | 7/8 |
+| Ambiguous | Category within documented plausible set | 7/8 | 8/8 |
+| Out of scope | Safe rejection | 0/8 | 0/8 |
+
+The adapter returned valid JSON with the required key for all 32 probes. It returned an allowed category for 31; for the leaking-faucet request it invented `repair_kitchen_faucet`. On the other seven out-of-scope probes it forced an unrelated banking category. The classical baseline forced all eight out-of-scope requests into known categories. Neither approach currently has safe unknown-request behavior, so an explicit rejection mechanism is required before serving untrusted inputs.
+
+The adapter’s one long-input error mapped a failed identity-verification request to `why_verify_identity` instead of `unable_to_verify_identity`. Its largest padded prompt in this run was 518 tokens. Complete raw predictions, configuration hashes, runtime measurements, and every failure are stored in `reports/robustness_predictions.jsonl`, `reports/robustness_evaluation.json`, and `reports/robustness_evaluation.md`.
+
+Reproduce the diagnostic run with:
+
+```bash
+python src/evaluate_robustness.py
+```
+
 ## Routing outputs
 
 The intended inference response contains:
@@ -216,9 +237,13 @@ triagetune/
 ├── notebooks/
 ├── reports/
 ├── src/
+│   ├── analyze_test_results.py
 │   ├── evaluate.py
+│   ├── evaluate_classical.py
+│   ├── evaluate_robustness.py
 │   ├── inference.py
 │   ├── prepare_data.py
+│   ├── summarize_test_evaluation.py
 │   ├── train_baseline.py
 │   └── train_lora.py
 ├── tests/
