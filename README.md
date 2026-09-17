@@ -42,6 +42,8 @@ TRIAGETUNE_ENABLE_PROVISIONAL_ROUTING=1 .venv/bin/python -m uvicorn api.main:app
 
 In a second terminal, send the example request shown in [Local serving](#local-serving-phase-5). The opt-in switch is for controlled local testing only; do not expose this endpoint to untrusted traffic. To run the automated checks without downloading weights, install the development requirements and run `pytest -q`. Project-authored source code and documentation are licensed under [Apache 2.0](LICENSE); the adapter has its own Apache 2.0 license, and the dataset remains under its publisher's CC BY 4.0 license.
 
+The versioned [model-card sources](model_card/README.md) and `src/package_adapter.py` verify the published adapter contents against the saved training report. The packaging script requires the locally saved adapter files; it does not download, retrain, or publish a model.
+
 ## Current status
 
 Phases 1 through 5 are complete for local use. The saved adapter serves real category predictions through a validated HTTP endpoint, and the CPU-only container built, started, and returned a real prediction. A later provisional routing policy adds project-created priority and team values. These values are deterministic rules based on the predicted category, not dataset labels or separately trained predictions. Unknown-request rejection remains unimplemented and the service is not ready for untrusted traffic. Provisional classification is now disabled by default and requires explicit local opt-in.
@@ -335,7 +337,7 @@ Run the automated checks with:
 pytest -q
 ```
 
-The recorded Phase 5 run had 16 passing tests. Later safety work added checks for exact category coverage, route outputs, synthetic-probe consistency, rejection-score calculations, external-report integrity, saved test metrics, and the default-off serving switch. The current run passed all 29 tests. The service runs only on loopback in the documented commands; production deployment and unknown-request rejection are not claimed.
+The recorded Phase 5 run had 16 passing tests. Later safety and release work added checks for exact category coverage, route outputs, synthetic-probe consistency, rejection-score calculations, external-report integrity, saved test metrics, model-card consistency, and the default-off serving switch. The current run passed all 32 tests. The service runs only on loopback in the documented commands; production deployment and unknown-request rejection are not claimed.
 
 ## Project layout
 
@@ -346,6 +348,10 @@ triagetune/
 ├── data/
 │   ├── processed/
 │   └── raw/
+├── model_card/
+│   ├── LICENSE
+│   ├── README.md
+│   └── labels.json
 ├── notebooks/
 ├── reports/
 ├── src/
@@ -354,6 +360,7 @@ triagetune/
 │   ├── evaluate_classical.py
 │   ├── evaluate_robustness.py
 │   ├── inference.py
+│   ├── package_adapter.py
 │   ├── prepare_data.py
 │   ├── summarize_test_evaluation.py
 │   ├── train_baseline.py
