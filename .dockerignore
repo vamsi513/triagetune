@@ -1,4 +1,11 @@
 .cache/
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.pfx
+credentials*.json
 .git/
 .pytest_cache/
 .venv/

@@ -19,6 +19,10 @@ TriageTune uses BANKING77, a collection of English online-banking queries annota
 - Published test records: 3,080
 - Provenance: annotated customer queries; not synthetic data
 
+The tracked source and derived data, attribution, checksums, and external challenge-set provenance are documented in `DATA_PROVENANCE.md`. The source-code license has not been selected; public visibility alone would not grant reuse rights.
+
+The current engineering assessment and release blockers are in `reports/engineering_audit.md`. Repository publication is paused pending the privacy steps in `reports/publication_plan.md`.
+
 The published test set remains reserved for final evaluation. Only the published training pool is divided into project training and validation splits.
 
 ## Measured data-preparation results
@@ -293,7 +297,7 @@ Run the automated checks with:
 pytest -q
 ```
 
-The recorded Phase 5 run had 16 passing tests. Later safety work added checks for exact category coverage, route outputs, synthetic-probe consistency, rejection-score calculations, external-report integrity, and the default-off serving switch. The current run passed all 25 tests. The service runs only on loopback in the documented commands; production deployment and unknown-request rejection are not claimed.
+The recorded Phase 5 run had 16 passing tests. Later safety work added checks for exact category coverage, route outputs, synthetic-probe consistency, rejection-score calculations, external-report integrity, saved test metrics, and the default-off serving switch. The current run passed all 29 tests. The service runs only on loopback in the documented commands; production deployment and unknown-request rejection are not claimed.
 
 ## Project layout
 
