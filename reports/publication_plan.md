@@ -6,7 +6,7 @@ This publication is a research release, not approval for automatic handling of l
 
 ## Remaining release work
 
-1. Choose a source-code license if reuse of the GitHub code is intended. The adapter is separately licensed under Apache 2.0, and the tracked BANKING77 data remains under the publisher's CC BY 4.0 license. Public visibility alone does not license the source code.
+1. Source-code licensing is complete: the owner approved Apache 2.0 for project-authored code and documentation, with the full text at the repository root. The adapter has a separate Apache 2.0 license. BANKING77 data and derived benchmark text remain under the publisher's CC BY 4.0 license and attribution.
 2. Keep the GitHub README, the Hugging Face model card, and the actual published files in sync. A fresh clone should point to the public adapter rather than imply that the saved weights are in Git.
 3. If the owner later decides to remove the personal email from Git history, plan a separate, explicitly approved rewrite and coordinate any force-push with existing clones. Rewriting reachable commits changes their identifiers and cannot guarantee removal from host caches or prior copies.
 4. Do not claim production readiness until representative scope-rejection evaluation, an approved routing policy, and serving controls are completed and reviewed.

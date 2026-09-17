@@ -4,6 +4,8 @@ Date: 2026-09-17. Scope: the current `main` branch, its reachable commit history
 
 Publication update (2026-09-17): The owner subsequently authorized publication with the existing personal email in Git commit metadata. The GitHub repository and Hugging Face adapter are now public. No history rewrite was performed. The privacy disposition and publication status below describe the original audit decision; the current decision is recorded in `publication_plan.md`.
 
+License update (2026-09-17): The owner subsequently approved Apache 2.0 for project-authored source code and documentation. The full license text is now at the repository root. BANKING77 data and benchmark text keep their separate publisher license. The original no-license finding below is resolved.
+
 ## Assessment
 
 **Research repository: 7/10. Deployment readiness: 2/10.** These are qualitative engineering judgments, not measured model scores. The repository has a reserved test split, four baselines or model variants, confidence intervals, error analysis, real local serving checks, and explicit negative results. It is not ready for public exposure of live requests because unknown-request rejection is unreliable, routing policy is provisional, and operational controls are missing.
@@ -33,7 +35,7 @@ The live model and container were not rerun for this audit. Earlier measured run
 | Privacy disclosure | Public visibility exposes a personal address in commit metadata. | The owner accepted this disclosure and made the repository public without rewriting history. See `reports/publication_plan.md`. |
 | High | Unsupported requests are often forced into banking categories. One frozen score rule accepted 201 of 600 external challenge requests; the same rule would wrongly reject 85 of 3,080 valid banking test requests. | Provisional classification remains off by default. No rejection threshold was enabled. Independently reviewed, representative scope data and an owner-defined error tolerance are needed. |
 | High | Priority and team are project-created guesses, not dataset targets or an approved operating policy. | Every route is marked provisional; automatic production routing remains out of scope pending owner review. |
-| Medium | No source-code license has been selected. Public visibility alone would not grant reuse rights. | No license was invented. The owner must choose one before claiming this as an open-source software release. Dataset licenses and attribution are separated in `DATA_PROVENANCE.md`. |
+| Resolved | The original audit found no source-code license. | The owner later approved Apache 2.0 for project-authored code and documentation. The root `LICENSE` and `DATA_PROVENANCE.md` separate this from the dataset license. |
 | Medium | The saved adapter and classical artifact are not in version control; a fresh clone cannot run the trained service immediately. | README and provenance documentation state this explicitly. Reproduction requires local training or a separately approved artifact publication. |
 | Medium | The data audit flagged 422 near-duplicate cross-split pairs at the chosen similarity threshold. | Results remain reported as measured; no test rows were changed after evaluation. These flags may make performance optimistic and need case review before stronger claims. |
 | Medium | The service has no authentication, traffic policy, privacy-safe request logging, or incident monitoring. | No public deployment was performed. The default-off switch reduces accidental exposure but is not a substitute for those controls. |

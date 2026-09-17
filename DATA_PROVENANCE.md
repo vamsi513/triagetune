@@ -19,4 +19,4 @@ The external intent dataset used for one scope challenge is from [Larson et al. 
 
 ## Code and model files
 
-The saved adapter, base-model cache, and classical-model artifact are ignored local files and are not distributed in this repository. This document describes data licenses only; it does not grant a license for the project's source code. A source-code license requires the repository owner's explicit choice.
+The saved adapter, base-model cache, and classical-model artifact are ignored local files and are not distributed in this repository. The repository owner's project-authored source code and documentation are licensed under the root Apache 2.0 `LICENSE`. That license does not relicense the BANKING77 source files, their processed derivatives, or benchmark query text reproduced in prediction reports; those materials remain subject to the publisher's CC BY 4.0 license and attribution. The separately published adapter has its own Apache 2.0 license.

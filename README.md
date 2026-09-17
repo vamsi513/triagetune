@@ -40,7 +40,7 @@ PY
 TRIAGETUNE_ENABLE_PROVISIONAL_ROUTING=1 .venv/bin/python -m uvicorn api.main:app --host 127.0.0.1 --port 8765
 ```
 
-In a second terminal, send the example request shown in [Local serving](#local-serving-phase-5). The opt-in switch is for controlled local testing only; do not expose this endpoint to untrusted traffic. To run the automated checks without downloading weights, install the development requirements and run `pytest -q`. The repository's source code has no reuse license yet; the adapter's Apache 2.0 license and the dataset's CC BY 4.0 license are separate.
+In a second terminal, send the example request shown in [Local serving](#local-serving-phase-5). The opt-in switch is for controlled local testing only; do not expose this endpoint to untrusted traffic. To run the automated checks without downloading weights, install the development requirements and run `pytest -q`. Project-authored source code and documentation are licensed under [Apache 2.0](LICENSE); the adapter has its own Apache 2.0 license, and the dataset remains under its publisher's CC BY 4.0 license.
 
 ## Current status
 
@@ -57,7 +57,7 @@ TriageTune uses BANKING77, a collection of English online-banking queries annota
 - Published test records: 3,080
 - Provenance: annotated customer queries; not synthetic data
 
-The tracked source and derived data, attribution, checksums, and external challenge-set provenance are documented in `DATA_PROVENANCE.md`. The source-code license has not been selected; public visibility alone does not grant reuse rights.
+The tracked source and derived data, attribution, checksums, and external challenge-set provenance are documented in `DATA_PROVENANCE.md`. The root Apache 2.0 license covers project-authored source code and documentation, not the separately licensed dataset or benchmark text included in reports.
 
 The engineering assessment and deployment blockers are in `reports/engineering_audit.md`. The public-release decision, including the known commit-email disclosure, is recorded in `reports/publication_plan.md`.
 
