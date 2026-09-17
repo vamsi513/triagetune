@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from contextlib import asynccontextmanager
-from typing import Annotated, Callable
+from typing import Annotated, Callable, Literal
 
 from fastapi import FastAPI, HTTPException
 from fastapi.concurrency import run_in_threadpool
@@ -15,6 +15,7 @@ from src.inference import (
     InvalidModelOutput,
     RoutingEngine,
 )
+from src.routing import build_routes
 
 
 class ClassifyRequest(BaseModel):
@@ -25,6 +26,12 @@ class ClassifyRequest(BaseModel):
 class ClassifyResponse(BaseModel):
     model_config = ConfigDict(extra="forbid")
     category: str = Field(min_length=1)
+    priority: Literal["urgent", "standard", "low"]
+    team: Literal[
+        "card_support", "payments", "transfers", "cash_atm",
+        "account_identity", "top_up", "foreign_exchange",
+    ]
+    routing_policy: Literal["provisional_project_mapping"]
 
 
 class HealthResponse(BaseModel):
@@ -46,6 +53,7 @@ class ModelInfoResponse(BaseModel):
     max_new_tokens: int
     unknown_request_handling: str
     priority_and_team: str
+    routing_policy: Literal["provisional_project_mapping"]
 
 
 def create_app(engine_factory: Callable[[], RoutingEngine] | None = None) -> FastAPI:
@@ -55,8 +63,10 @@ def create_app(engine_factory: Callable[[], RoutingEngine] | None = None) -> Fas
     @asynccontextmanager
     async def lifespan(app: FastAPI):
         app.state.engine = await run_in_threadpool(engine_factory)
+        app.state.routes = build_routes(app.state.engine.allowed_categories)
         yield
         del app.state.engine
+        del app.state.routes
 
     service = FastAPI(title="TriageTune", version="0.1.0", lifespan=lifespan)
 
@@ -66,7 +76,11 @@ def create_app(engine_factory: Callable[[], RoutingEngine] | None = None) -> Fas
 
     @service.get("/model-info", response_model=ModelInfoResponse)
     async def model_info() -> ModelInfoResponse:
-        return ModelInfoResponse.model_validate(service.state.engine.info())
+        return ModelInfoResponse.model_validate({
+            **service.state.engine.info(),
+            "priority_and_team": "provisional_project_mapping",
+            "routing_policy": "provisional_project_mapping",
+        })
 
     @service.post("/classify", response_model=ClassifyResponse)
     async def classify(request: ClassifyRequest) -> ClassifyResponse:
@@ -78,7 +92,13 @@ def create_app(engine_factory: Callable[[], RoutingEngine] | None = None) -> Fas
             raise HTTPException(status_code=422, detail=str(error)) from error
         if category not in service.state.engine.allowed_categories:
             raise HTTPException(status_code=422, detail="model output is not an approved category")
-        return ClassifyResponse(category=category)
+        route = service.state.routes[category]
+        return ClassifyResponse(
+            category=category,
+            priority=route.priority,
+            team=route.team,
+            routing_policy="provisional_project_mapping",
+        )
 
     return service
 

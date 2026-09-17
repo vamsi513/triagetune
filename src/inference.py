@@ -112,7 +112,7 @@ class RoutingEngine:
             "max_input_tokens": self.settings.max_input_tokens,
             "max_new_tokens": self.settings.max_new_tokens,
             "unknown_request_handling": "not_supported",
-            "priority_and_team": "not_approved",
+            "priority_and_team": "provisional_project_mapping",
         }
 
     def classify(self, text: str) -> str:

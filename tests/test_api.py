@@ -8,11 +8,17 @@ from fastapi.testclient import TestClient
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from api.main import create_app
-from src.inference import InputTooLong, InvalidModelOutput
+from src.inference import InputTooLong, InvalidModelOutput, load_categories
+from src.routing import build_routes
+
+
+ALL_CATEGORIES = set(
+    load_categories(Path(__file__).resolve().parents[1] / "reports" / "lora_adapter_test.json")
+)
 
 
 class FakeEngine:
-    allowed_categories = {"card_swallowed"}
+    allowed_categories = ALL_CATEGORIES
 
     def info(self):
         return {
@@ -38,6 +44,8 @@ class FakeEngine:
             raise InvalidModelOutput("model output is not an approved category")
         if text == "unexpected category":
             return "invented"
+        if text in self.allowed_categories:
+            return text
         return "card_swallowed"
 
 
@@ -47,13 +55,16 @@ def test_health_and_model_info():
         info = client.get("/model-info")
         assert info.status_code == 200
         assert info.json()["category_count"] == 77
-        assert info.json()["priority_and_team"] == "not_approved"
+        assert info.json()["priority_and_team"] == "provisional_project_mapping"
 
 
 def test_classification_and_request_validation():
     with TestClient(create_app(engine_factory=FakeEngine)) as client:
         assert client.post("/classify", json={"text": "  card swallowed  "}).json() == {
-            "category": "card_swallowed"
+            "category": "card_swallowed",
+            "priority": "standard",
+            "team": "card_support",
+            "routing_policy": "provisional_project_mapping",
         }
         assert client.post("/classify", json={"text": " "}).status_code == 422
         assert client.post("/classify", json={"text": "x" * 2001}).status_code == 422
@@ -65,3 +76,17 @@ def test_invalid_generation_and_context_limit_fail_closed():
         assert client.post("/classify", json={"text": "invalid output"}).status_code == 422
         assert client.post("/classify", json={"text": "unexpected category"}).status_code == 422
         assert client.post("/classify", json={"text": "too many tokens"}).status_code == 413
+
+
+def test_every_approved_category_gets_its_expected_route():
+    routes = build_routes(ALL_CATEGORIES)
+    with TestClient(create_app(engine_factory=FakeEngine)) as client:
+        for category, route in routes.items():
+            response = client.post("/classify", json={"text": category})
+            assert response.status_code == 200
+            assert response.json() == {
+                "category": category,
+                "priority": route.priority,
+                "team": route.team,
+                "routing_policy": "provisional_project_mapping",
+            }

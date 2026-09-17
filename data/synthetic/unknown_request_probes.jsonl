@@ -1,0 +1,32 @@
+{"synthetic":true,"group":"in_scope_direct","scope":"in_scope","expected_category":"lost_or_stolen_card","text":"I lost my bank card on the train and need to secure it."}
+{"synthetic":true,"group":"in_scope_direct","scope":"in_scope","expected_category":"pin_blocked","text":"My PIN was blocked after several attempts."}
+{"synthetic":true,"group":"in_scope_direct","scope":"in_scope","expected_category":"card_payment_not_recognised","text":"There is a card purchase on my statement that I did not make."}
+{"synthetic":true,"group":"in_scope_direct","scope":"in_scope","expected_category":"top_up_failed","text":"My attempt to add money by card failed."}
+{"synthetic":true,"group":"in_scope_direct","scope":"in_scope","expected_category":"transfer_not_received_by_recipient","text":"I sent a bank transfer, but the recipient says it never arrived."}
+{"synthetic":true,"group":"in_scope_direct","scope":"in_scope","expected_category":"cash_withdrawal_not_recognised","text":"I see an ATM withdrawal I do not recognize."}
+{"synthetic":true,"group":"in_scope_direct","scope":"in_scope","expected_category":"unable_to_verify_identity","text":"The app keeps rejecting my identity verification documents."}
+{"synthetic":true,"group":"in_scope_direct","scope":"in_scope","expected_category":"refund_not_showing_up","text":"The merchant refunded me, but the money is not in my account."}
+{"synthetic":true,"group":"in_scope_paraphrase","scope":"in_scope","expected_category":"card_swallowed","text":"The cash machine kept my card after I entered my PIN."}
+{"synthetic":true,"group":"in_scope_paraphrase","scope":"in_scope","expected_category":"passcode_forgotten","text":"I cannot remember the code used to sign in to the app."}
+{"synthetic":true,"group":"in_scope_paraphrase","scope":"in_scope","expected_category":"transaction_charged_twice","text":"One purchase appears two times in my transaction history."}
+{"synthetic":true,"group":"in_scope_paraphrase","scope":"in_scope","expected_category":"wrong_amount_of_cash_received","text":"The ATM gave me less cash than the amount it debited."}
+{"synthetic":true,"group":"in_scope_paraphrase","scope":"in_scope","expected_category":"card_arrival","text":"When should my new debit card reach me?"}
+{"synthetic":true,"group":"in_scope_paraphrase","scope":"in_scope","expected_category":"exchange_rate","text":"What rate will be used if I convert pounds to euros in the app?"}
+{"synthetic":true,"group":"in_scope_paraphrase","scope":"in_scope","expected_category":"terminate_account","text":"Please tell me how to close my account permanently."}
+{"synthetic":true,"group":"in_scope_paraphrase","scope":"in_scope","expected_category":"pending_transfer","text":"My transfer still says pending and has not completed."}
+{"synthetic":true,"group":"out_of_scope_unrelated","scope":"out_of_scope","expected_category":null,"text":"How do I repair a leaking kitchen faucet?"}
+{"synthetic":true,"group":"out_of_scope_unrelated","scope":"out_of_scope","expected_category":null,"text":"What is the weather forecast for tomorrow?"}
+{"synthetic":true,"group":"out_of_scope_unrelated","scope":"out_of_scope","expected_category":null,"text":"My laptop fan is noisy. How can I clean it?"}
+{"synthetic":true,"group":"out_of_scope_unrelated","scope":"out_of_scope","expected_category":null,"text":"Give me a recipe for vegetable soup."}
+{"synthetic":true,"group":"out_of_scope_unrelated","scope":"out_of_scope","expected_category":null,"text":"Which bus goes to the museum?"}
+{"synthetic":true,"group":"out_of_scope_unrelated","scope":"out_of_scope","expected_category":null,"text":"How do I prune a rose bush?"}
+{"synthetic":true,"group":"out_of_scope_unrelated","scope":"out_of_scope","expected_category":null,"text":"Can you explain how to tune a guitar?"}
+{"synthetic":true,"group":"out_of_scope_unrelated","scope":"out_of_scope","expected_category":null,"text":"How long should I boil an egg?"}
+{"synthetic":true,"group":"out_of_scope_financial_adjacent","scope":"out_of_scope","expected_category":null,"text":"Should I buy shares in a particular company today?"}
+{"synthetic":true,"group":"out_of_scope_financial_adjacent","scope":"out_of_scope","expected_category":null,"text":"What tax deductions can I claim on my return?"}
+{"synthetic":true,"group":"out_of_scope_financial_adjacent","scope":"out_of_scope","expected_category":null,"text":"Can you approve my mortgage application?"}
+{"synthetic":true,"group":"out_of_scope_financial_adjacent","scope":"out_of_scope","expected_category":null,"text":"What is the best car insurance policy for me?"}
+{"synthetic":true,"group":"out_of_scope_financial_adjacent","scope":"out_of_scope","expected_category":null,"text":"Predict tomorrow's cryptocurrency price."}
+{"synthetic":true,"group":"out_of_scope_financial_adjacent","scope":"out_of_scope","expected_category":null,"text":"How can I improve my credit score over the next year?"}
+{"synthetic":true,"group":"out_of_scope_financial_adjacent","scope":"out_of_scope","expected_category":null,"text":"Compare interest rates for home loans at different lenders."}
+{"synthetic":true,"group":"out_of_scope_financial_adjacent","scope":"out_of_scope","expected_category":null,"text":"Please draft a will that divides my property among relatives."}

@@ -1,0 +1,194 @@
+{
+  "evaluation": "synthetic_unknown_request_exploration",
+  "retraining_performed": false,
+  "rejection_enabled_in_service": false,
+  "records": 32,
+  "calibration_records": 16,
+  "held_out_records": 16,
+  "source": "project_created_synthetic",
+  "inputs": {
+    "probes_sha256": "a073c484a995d73a0d8ff99e64f4a38bdae2317468b0ca2113d175adfea5510b",
+    "classical_model_sha256": "6cc56cc1a068ffb3cc87f6f55e36414bbeb161b77e3c5ca3d975481e11281162",
+    "adapter_weights_sha256": "3ef2bce78ceaccf108bb2459f32ddedd46933310b0a03a9f93588aa1778a3e29"
+  },
+  "runtime": {
+    "device": "cpu",
+    "dtype": "float32",
+    "model_load_seconds": 4.869461875001434,
+    "total_model_inference_seconds": 59.41137854099361
+  },
+  "model_category_results": {
+    "known_exact": 13,
+    "known_total": 16,
+    "unknown_forced_known": 9,
+    "unknown_total": 16
+  },
+  "invalid_output_only": {
+    "calibration": {
+      "confusion_counts": {
+        "known_accepted": 8,
+        "unknown_accepted": 5,
+        "unknown_rejected": 3
+      },
+      "group_counts": {
+        "in_scope_direct": {
+          "known_accepted": 4
+        },
+        "in_scope_paraphrase": {
+          "known_accepted": 4
+        },
+        "out_of_scope_financial_adjacent": {
+          "unknown_accepted": 4
+        },
+        "out_of_scope_unrelated": {
+          "unknown_accepted": 1,
+          "unknown_rejected": 3
+        }
+      },
+      "unknown_rejection_rate": 0.375,
+      "known_false_rejection_rate": 0.0
+    },
+    "held_out": {
+      "confusion_counts": {
+        "known_accepted": 8,
+        "unknown_accepted": 4,
+        "unknown_rejected": 4
+      },
+      "group_counts": {
+        "in_scope_direct": {
+          "known_accepted": 4
+        },
+        "in_scope_paraphrase": {
+          "known_accepted": 4
+        },
+        "out_of_scope_financial_adjacent": {
+          "unknown_rejected": 4
+        },
+        "out_of_scope_unrelated": {
+          "unknown_accepted": 4
+        }
+      },
+      "unknown_rejection_rate": 0.5,
+      "known_false_rejection_rate": 0.0
+    }
+  },
+  "candidate_signals": {
+    "classical_max_probability": {
+      "threshold": 0.055439042873027214,
+      "calibration_balanced_accuracy": 0.9375,
+      "selection": "maximize calibration balanced accuracy; then minimize known rejections",
+      "calibration": {
+        "confusion_counts": {
+          "known_accepted": 8,
+          "unknown_accepted": 1,
+          "unknown_rejected": 7
+        },
+        "group_counts": {
+          "in_scope_direct": {
+            "known_accepted": 4
+          },
+          "in_scope_paraphrase": {
+            "known_accepted": 4
+          },
+          "out_of_scope_financial_adjacent": {
+            "unknown_accepted": 1,
+            "unknown_rejected": 3
+          },
+          "out_of_scope_unrelated": {
+            "unknown_rejected": 4
+          }
+        },
+        "unknown_rejection_rate": 0.875,
+        "known_false_rejection_rate": 0.0
+      },
+      "held_out": {
+        "confusion_counts": {
+          "known_accepted": 7,
+          "known_rejected": 1,
+          "unknown_accepted": 3,
+          "unknown_rejected": 5
+        },
+        "group_counts": {
+          "in_scope_direct": {
+            "known_accepted": 4
+          },
+          "in_scope_paraphrase": {
+            "known_accepted": 3,
+            "known_rejected": 1
+          },
+          "out_of_scope_financial_adjacent": {
+            "unknown_rejected": 4
+          },
+          "out_of_scope_unrelated": {
+            "unknown_accepted": 3,
+            "unknown_rejected": 1
+          }
+        },
+        "unknown_rejection_rate": 0.625,
+        "known_false_rejection_rate": 0.125
+      }
+    },
+    "nearest_training_cosine": {
+      "threshold": 0.33110397176125417,
+      "calibration_balanced_accuracy": 0.8125,
+      "selection": "maximize calibration balanced accuracy; then minimize known rejections",
+      "calibration": {
+        "confusion_counts": {
+          "known_accepted": 8,
+          "unknown_accepted": 3,
+          "unknown_rejected": 5
+        },
+        "group_counts": {
+          "in_scope_direct": {
+            "known_accepted": 4
+          },
+          "in_scope_paraphrase": {
+            "known_accepted": 4
+          },
+          "out_of_scope_financial_adjacent": {
+            "unknown_accepted": 2,
+            "unknown_rejected": 2
+          },
+          "out_of_scope_unrelated": {
+            "unknown_accepted": 1,
+            "unknown_rejected": 3
+          }
+        },
+        "unknown_rejection_rate": 0.625,
+        "known_false_rejection_rate": 0.0
+      },
+      "held_out": {
+        "confusion_counts": {
+          "known_accepted": 7,
+          "known_rejected": 1,
+          "unknown_accepted": 3,
+          "unknown_rejected": 5
+        },
+        "group_counts": {
+          "in_scope_direct": {
+            "known_accepted": 4
+          },
+          "in_scope_paraphrase": {
+            "known_accepted": 3,
+            "known_rejected": 1
+          },
+          "out_of_scope_financial_adjacent": {
+            "unknown_rejected": 4
+          },
+          "out_of_scope_unrelated": {
+            "unknown_accepted": 3,
+            "unknown_rejected": 1
+          }
+        },
+        "unknown_rejection_rate": 0.625,
+        "known_false_rejection_rate": 0.125
+      }
+    }
+  },
+  "limitations": [
+    "All probes are synthetic and manually authored; this is not production performance.",
+    "Each signal uses only 16 calibration and 16 held-out examples.",
+    "The held-out examples share authorship and patterns with calibration examples.",
+    "No threshold is activated in the service from this exploratory study."
+  ]
+}

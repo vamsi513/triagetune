@@ -6,7 +6,7 @@ The project is developed in checkpoints. Measurements are recorded only after th
 
 ## Current status
 
-Phases 1 through 5 are complete for local category-only use. The saved adapter serves real predictions through a validated HTTP endpoint, and the CPU-only container built, started, and returned a real prediction. Unknown-request rejection and priority/team annotations remain unimplemented because their behavior has not been validated or approved.
+Phases 1 through 5 are complete for local use. The saved adapter serves real category predictions through a validated HTTP endpoint, and the CPU-only container built, started, and returned a real prediction. A later provisional routing policy adds project-created priority and team values. These values are deterministic rules based on the predicted category, not dataset labels or separately trained predictions. Unknown-request rejection remains unimplemented and the service is not ready for untrusted traffic.
 
 ## Dataset
 
@@ -217,20 +217,32 @@ python src/evaluate_robustness.py
 
 ## Routing outputs
 
-The current serving response contains only:
+The current response has a canonical BANKING77 `category`, plus project-created `priority` and `team` values derived from that category. `routing_policy` is always `provisional_project_mapping` to identify this distinction. BANKING77 supplies only the intent; it does not provide priority or team ground truth. The exhaustive 77-category mapping and rule checks are in `src/routing.py`. Policy rationale, group counts, and the unknown-request test design are in `reports/routing_rejection_design.md`. These provisional values are not a validated operational escalation policy.
 
-- `category`: a canonical BANKING77 intent
+## Exploratory unknown-request rejection
 
-The intended full routing response would also contain:
+The saved model and two lightweight score signals were measured on 32 clearly synthetic requests: 16 in-scope and 16 out-of-scope. The first four requests in each of four groups formed a 16-row calibration half; the remaining 16 formed a held-out half. No retraining occurred. The saved model assigned an approved banking category to 9 of the 16 out-of-scope requests and exactly matched 13 of 16 in-scope target categories.
 
-- `priority`: a project-created routing annotation
-- `team`: a project-created routing annotation
+| Decision rule | Held-out unknowns rejected | Held-out known requests wrongly rejected |
+| --- | ---: | ---: |
+| Invalid or disallowed model output only | 4/8 | 0/8 |
+| Classical-model maximum-probability threshold | 5/8 | 1/8 |
+| Nearest-training-text similarity threshold | 5/8 | 1/8 |
 
-BANKING77 supplies only the intent. Priority and team mappings require separate approval and will be documented as project-created annotations rather than original dataset labels.
+The two thresholds were selected only on the synthetic calibration half. Applied unchanged to the previously evaluated 3,080-record BANKING77 test split, the maximum-probability rule would wrongly reject 85 valid banking requests (2.76%), including 42 that the saved model classified correctly. The similarity rule would wrongly reject 123 (3.99%), including 72 correctly classified requests. These are exploratory results, not production estimates: the synthetic set is small, manually authored, and shares patterns across its halves. Neither rule is enabled in the service.
+
+Reproduce the measurements with the locally saved adapter and classical model:
+
+```bash
+.venv/bin/python -m src.evaluate_unknown_rejection
+.venv/bin/python -m src.audit_rejection_on_test
+```
+
+The row-level synthetic results and complete summaries are stored in `reports/unknown_rejection_predictions.jsonl`, `reports/unknown_rejection_evaluation.json`, and `reports/unknown_rejection_test_audit.json`.
 
 ## Local serving: Phase 5
 
-The service loads the saved adapter once at startup and exposes `GET /health`, `GET /model-info`, and `POST /classify`. Classification accepts a nonblank `text` field and returns a validated canonical `category`. Extra request fields, text over 2,000 characters, and rendered prompts over 1,024 tokens are rejected. A malformed or disallowed model category returns HTTP 422; it is never silently repaired or represented as a successful prediction. Generation is serialized behind a lock to limit accelerator-memory pressure under concurrent requests.
+The service loads the saved adapter once at startup and exposes `GET /health`, `GET /model-info`, and `POST /classify`. Classification accepts a nonblank `text` field and returns a validated canonical `category` with the provisional route. Extra request fields, text over 2,000 characters, and rendered prompts over 1,024 tokens are rejected. A malformed or disallowed model category returns HTTP 422; it is never silently repaired or represented as a successful prediction. Generation is serialized behind a lock to limit accelerator-memory pressure under concurrent requests.
 
 Run the native service from the project root after installing `requirements.txt` and ensuring the locally saved adapter and model cache are present:
 
@@ -246,7 +258,7 @@ curl -X POST http://127.0.0.1:8765/classify \
   -d '{"text":"I cannot use my PIN."}'
 ```
 
-This returned `{"category":"pin_blocked"}` during the measured local run. A separate in-scope card-swallowed request returned HTTP 422 because the model output was disallowed, so successful handling is not universal. The out-of-scope robustness result remains unresolved; this endpoint should not be exposed as a trusted general-purpose router.
+Before the provisional policy was added, this returned `{"category":"pin_blocked"}` during the measured local run. The current endpoint additionally returns `priority`, `team`, and `routing_policy`; its route is determined only after the category passes validation. A separate in-scope card-swallowed request returned HTTP 422 because the model output was disallowed, so successful handling is not universal. The out-of-scope robustness result remains unresolved; this endpoint should not be exposed as a trusted general-purpose router.
 
 The container uses a CPU-only runtime. It deliberately excludes model weights from the image; provide the ignored local adapter and base-model cache as read-only mounts:
 
@@ -268,7 +280,7 @@ Run the automated checks with:
 pytest -q
 ```
 
-Sixteen tests passed in the recorded run, covering request validation, service endpoints, response validation, the inference path, and earlier evaluation utilities. The service runs only on loopback in the documented commands; production deployment and unknown-request rejection are not claimed.
+The recorded Phase 5 run had 16 passing tests. The later provisional-policy changes add checks for exact category coverage, route outputs, synthetic-probe consistency, and rejection-score calculations. The current run passed all 22 tests. The service runs only on loopback in the documented commands; production deployment and unknown-request rejection are not claimed.
 
 ## Project layout
 

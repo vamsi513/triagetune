@@ -1,0 +1,29 @@
+{
+  "evaluation": "frozen_threshold_audit_on_published_banking_test_split",
+  "records": 3080,
+  "thresholds_selected_on": "16 project-created synthetic calibration requests",
+  "threshold_tuning_on_test_performed": false,
+  "model_retraining_or_regeneration_performed": false,
+  "invalid_output_only_valid_banking_requests_rejected": 8,
+  "candidate_signals": {
+    "classical_max_probability": {
+      "threshold_from_synthetic_calibration": 0.055439042873027214,
+      "valid_banking_requests_rejected": 85,
+      "valid_banking_requests_rejected_rate": 0.027597402597402596,
+      "valid_banking_requests_accepted": 2995,
+      "accepted_correct_category": 2437,
+      "accepted_category_accuracy": 0.8136894824707847,
+      "correct_category_requests_rejected": 42
+    },
+    "nearest_training_cosine": {
+      "threshold_from_synthetic_calibration": 0.33110397176125417,
+      "valid_banking_requests_rejected": 123,
+      "valid_banking_requests_rejected_rate": 0.039935064935064934,
+      "valid_banking_requests_accepted": 2957,
+      "accepted_correct_category": 2407,
+      "accepted_category_accuracy": 0.8140006763611769,
+      "correct_category_requests_rejected": 72
+    }
+  },
+  "interpretation": "Every test request belongs to a known banking category; rejection here is a false rejection. This audit cannot measure unknown-request detection."
+}
