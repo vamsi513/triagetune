@@ -1,0 +1,98 @@
+{
+  "evaluation": "external_scope_challenge",
+  "source": {
+    "repository": "https://github.com/clinc/oos-eval",
+    "revision": "828f8093932c8fe6ca7936c3d2e52903b1c523de",
+    "file": "data/data_full.json",
+    "sha256": "36923c3705a59e08fe9c3883d8bc2dd966ef93e22cb78ac41171782a698d56e0",
+    "license": "CC BY 3.0",
+    "attribution": "Larson et al., An Evaluation Dataset for Intent Classification and Out-of-Scope Prediction, 2019"
+  },
+  "selection": {
+    "split": "test",
+    "nonbanking_labels": [
+      "alarm",
+      "book_flight",
+      "calendar_update",
+      "cook_time",
+      "directions",
+      "jump_start",
+      "meal_suggestion",
+      "play_music",
+      "recipe",
+      "restaurant_reservation",
+      "smart_home",
+      "timer",
+      "tire_pressure",
+      "traffic",
+      "translate",
+      "weather"
+    ],
+    "financial_adjacent_labels": [
+      "credit_score",
+      "improve_credit_score",
+      "insurance_change",
+      "taxes"
+    ],
+    "records_per_label": 30,
+    "total_records": 600,
+    "scope_note": "Label-level selection only; individual examples have not been independently reviewed against BANKING77."
+  },
+  "thresholds_selected_on_external_data": false,
+  "candidate_scores_without_model_output_check": {
+    "classical_max_probability": {
+      "frozen_threshold": 0.055439042873027214,
+      "rejected": 399,
+      "accepted": 201,
+      "by_group": {
+        "financial_adjacent": {
+          "accepted": 67,
+          "rejected": 53
+        },
+        "nonbanking": {
+          "rejected": 346,
+          "accepted": 134
+        }
+      },
+      "decision_rule": "score below threshold; model-output validity not included"
+    },
+    "nearest_training_cosine": {
+      "frozen_threshold": 0.33110397176125417,
+      "rejected": 136,
+      "accepted": 464,
+      "by_group": {
+        "financial_adjacent": {
+          "accepted": 111,
+          "rejected": 9
+        },
+        "nonbanking": {
+          "accepted": 353,
+          "rejected": 127
+        }
+      },
+      "decision_rule": "score below threshold; model-output validity not included"
+    }
+  },
+  "saved_model_sample": {
+    "selection": "first two source-order records from each selected label",
+    "records": 40,
+    "by_group": {
+      "financial_adjacent": {
+        "forced_banking_category": 8
+      },
+      "nonbanking": {
+        "forced_banking_category": 27,
+        "invalid_or_disallowed_output": 5
+      }
+    },
+    "device": "cpu",
+    "dtype": "float32"
+  },
+  "rejection_enabled_in_service": false,
+  "limitations": [
+    "External intents were labeled for a different application, not this banking router.",
+    "Some financially adjacent examples may overlap a supported banking category.",
+    "The 40-record model sample is deterministic but small and not a random draw.",
+    "This dataset does not represent real requests to this service."
+  ]
+}

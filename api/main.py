@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from contextlib import asynccontextmanager
 from typing import Annotated, Callable, Literal
 
@@ -54,11 +55,17 @@ class ModelInfoResponse(BaseModel):
     unknown_request_handling: str
     priority_and_team: str
     routing_policy: Literal["provisional_project_mapping"]
+    provisional_routing_enabled: bool
 
 
-def create_app(engine_factory: Callable[[], RoutingEngine] | None = None) -> FastAPI:
+def create_app(
+    engine_factory: Callable[[], RoutingEngine] | None = None,
+    enable_provisional_routing: bool | None = None,
+) -> FastAPI:
     if engine_factory is None:
         engine_factory = lambda: RoutingEngine(InferenceSettings.from_environment())
+    if enable_provisional_routing is None:
+        enable_provisional_routing = os.getenv("TRIAGETUNE_ENABLE_PROVISIONAL_ROUTING") == "1"
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
@@ -80,10 +87,16 @@ def create_app(engine_factory: Callable[[], RoutingEngine] | None = None) -> Fas
             **service.state.engine.info(),
             "priority_and_team": "provisional_project_mapping",
             "routing_policy": "provisional_project_mapping",
+            "provisional_routing_enabled": enable_provisional_routing,
         })
 
     @service.post("/classify", response_model=ClassifyResponse)
     async def classify(request: ClassifyRequest) -> ClassifyResponse:
+        if not enable_provisional_routing:
+            raise HTTPException(
+                status_code=503,
+                detail="provisional routing is disabled; explicit local opt-in is required",
+            )
         try:
             category = await run_in_threadpool(service.state.engine.classify, request.text)
         except InputTooLong as error:

@@ -6,7 +6,7 @@ The project is developed in checkpoints. Measurements are recorded only after th
 
 ## Current status
 
-Phases 1 through 5 are complete for local use. The saved adapter serves real category predictions through a validated HTTP endpoint, and the CPU-only container built, started, and returned a real prediction. A later provisional routing policy adds project-created priority and team values. These values are deterministic rules based on the predicted category, not dataset labels or separately trained predictions. Unknown-request rejection remains unimplemented and the service is not ready for untrusted traffic.
+Phases 1 through 5 are complete for local use. The saved adapter serves real category predictions through a validated HTTP endpoint, and the CPU-only container built, started, and returned a real prediction. A later provisional routing policy adds project-created priority and team values. These values are deterministic rules based on the predicted category, not dataset labels or separately trained predictions. Unknown-request rejection remains unimplemented and the service is not ready for untrusted traffic. Provisional classification is now disabled by default and requires explicit local opt-in.
 
 ## Dataset
 
@@ -231,6 +231,18 @@ The saved model and two lightweight score signals were measured on 32 clearly sy
 
 The two thresholds were selected only on the synthetic calibration half. Applied unchanged to the previously evaluated 3,080-record BANKING77 test split, the maximum-probability rule would wrongly reject 85 valid banking requests (2.76%), including 42 that the saved model classified correctly. The similarity rule would wrongly reject 123 (3.99%), including 72 correctly classified requests. These are exploratory results, not production estimates: the synthetic set is small, manually authored, and shares patterns across its halves. Neither rule is enabled in the service.
 
+An independently authored external intent set was also checked without tuning either threshold. For 600 requests selected from 20 clearly non-banking or financially adjacent intent groups, the frozen maximum-probability threshold rejected 399 and accepted 201. In a deterministic 40-request subset run through the saved model, 35 received a banking category and five produced invalid or disallowed categories. The external set belongs to a different application and has not had each request independently reviewed against BANKING77, so these are challenge-set counts, not a deployment estimate. The source is [Larson et al.'s intent dataset](https://github.com/clinc/oos-eval), revision `828f8093932c8fe6ca7936c3d2e52903b1c523de`, licensed CC BY 3.0. The source file is cached locally, not redistributed in this repository. Full selection and results are in `reports/external_scope_evaluation.json`.
+
+To reproduce this external check, download the pinned source into the ignored cache, then run the checksum-validating evaluator:
+
+```bash
+curl -fL -o .cache/clinc_oos_data_full.json \
+  https://raw.githubusercontent.com/clinc/oos-eval/828f8093932c8fe6ca7936c3d2e52903b1c523de/data/data_full.json
+.venv/bin/python -m src.evaluate_external_scope
+```
+
+The release blockers and needed review inputs are summarized in `reports/production_readiness.md`.
+
 Reproduce the measurements with the locally saved adapter and classical model:
 
 ```bash
@@ -242,12 +254,12 @@ The row-level synthetic results and complete summaries are stored in `reports/un
 
 ## Local serving: Phase 5
 
-The service loads the saved adapter once at startup and exposes `GET /health`, `GET /model-info`, and `POST /classify`. Classification accepts a nonblank `text` field and returns a validated canonical `category` with the provisional route. Extra request fields, text over 2,000 characters, and rendered prompts over 1,024 tokens are rejected. A malformed or disallowed model category returns HTTP 422; it is never silently repaired or represented as a successful prediction. Generation is serialized behind a lock to limit accelerator-memory pressure under concurrent requests.
+The service loads the saved adapter once at startup and exposes `GET /health`, `GET /model-info`, and `POST /classify`. Classification is disabled by default and returns HTTP 503 unless `TRIAGETUNE_ENABLE_PROVISIONAL_ROUTING=1` is set explicitly. This switch is for local experimentation only; it does not make routing safe for untrusted requests. With the switch on, classification accepts a nonblank `text` field and returns a validated canonical `category` with the provisional route. Extra request fields, text over 2,000 characters, and rendered prompts over 1,024 tokens are rejected. A malformed or disallowed model category returns HTTP 422; it is never silently repaired or represented as a successful prediction. Generation is serialized behind a lock to limit accelerator-memory pressure under concurrent requests.
 
 Run the native service from the project root after installing `requirements.txt` and ensuring the locally saved adapter and model cache are present:
 
 ```bash
-uvicorn api.main:app --host 127.0.0.1 --port 8765
+TRIAGETUNE_ENABLE_PROVISIONAL_ROUTING=1 uvicorn api.main:app --host 127.0.0.1 --port 8765
 ```
 
 Example request:
@@ -265,6 +277,7 @@ The container uses a CPU-only runtime. It deliberately excludes model weights fr
 ```bash
 docker build -t triagetune-local:phase5 .
 docker run --rm -p 127.0.0.1:8766:8000 \
+  -e TRIAGETUNE_ENABLE_PROVISIONAL_ROUTING=1 \
   -v "$PWD/artifacts/lora_adapter:/models/adapter:ro" \
   -v "$PWD/.cache/huggingface:/models/cache:ro" \
   triagetune-local:phase5
@@ -280,7 +293,7 @@ Run the automated checks with:
 pytest -q
 ```
 
-The recorded Phase 5 run had 16 passing tests. The later provisional-policy changes add checks for exact category coverage, route outputs, synthetic-probe consistency, and rejection-score calculations. The current run passed all 22 tests. The service runs only on loopback in the documented commands; production deployment and unknown-request rejection are not claimed.
+The recorded Phase 5 run had 16 passing tests. Later safety work added checks for exact category coverage, route outputs, synthetic-probe consistency, rejection-score calculations, external-report integrity, and the default-off serving switch. The current run passed all 25 tests. The service runs only on loopback in the documented commands; production deployment and unknown-request rejection are not claimed.
 
 ## Project layout
 
