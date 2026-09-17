@@ -1,13 +1,12 @@
-# Private-to-public publication plan
+# Public-release decision record
 
-Current state: the repository is **private**. The owner chose to keep it private while planning a commit-history rewrite. This plan does not authorize or perform that rewrite or a visibility change.
+As of 2026-09-17, the GitHub source repository and the separate Hugging Face adapter repository are public. The owner explicitly accepted that the existing GitHub commit history exposes a personal Gmail address. No history rewrite or force-push was performed. The Hugging Face adapter's commit history was checked separately and uses Hugging Face no-reply and service addresses.
 
-1. Confirm the exact no-reply commit address to use for past and future commits. Set local commit identity for future work separately; that does not alter old commits.
-2. Decide whether to add a source-code license. The tracked BANKING77 data remains under its publisher's CC BY 4.0 license regardless of the software choice. Public visibility can be chosen without a source-code license, but that should be stated plainly.
-3. Before rewriting, record the current branch tip and make a recoverable, private backup. Check for collaborators, forks, open requests, tags, and other branches that might still reference old commits.
-4. With explicit approval for the history rewrite, perform it in an isolated clone, replacing author and committer email metadata in every reachable project commit while preserving the intended names, dates, messages, and file content. Rewritten commits receive new identifiers and may invalidate old signatures or links.
-5. Run all tests, recheck tracked-file and history scans, and verify that no reachable commit retains the personal address. Review the full comparison before any force-push. Coordinate with anyone who has cloned the old history.
-6. With explicit approval for the force-push, update the private remote branch, verify the new remote history, and understand that host caches or prior clones may retain old commit objects for some time; rewriting is not a guaranteed erasure mechanism.
-7. Only then, with approval to publish the reviewed state, change visibility to public and verify access without authentication. Recheck README, data attribution, license choice, default-off classification, and repository settings from the public view.
+This publication is a research release, not approval for automatic handling of live banking-support requests. Classification is disabled by default; enabling the provisional local service does not resolve the deployment blockers in `production_readiness.md`.
 
-The model is still not approved for automatic handling of untrusted requests. Making the source repository public is separate from making the service production-ready.
+## Remaining release work
+
+1. Choose a source-code license if reuse of the GitHub code is intended. The adapter is separately licensed under Apache 2.0, and the tracked BANKING77 data remains under the publisher's CC BY 4.0 license. Public visibility alone does not license the source code.
+2. Keep the GitHub README, the Hugging Face model card, and the actual published files in sync. A fresh clone should point to the public adapter rather than imply that the saved weights are in Git.
+3. If the owner later decides to remove the personal email from Git history, plan a separate, explicitly approved rewrite and coordinate any force-push with existing clones. Rewriting reachable commits changes their identifiers and cannot guarantee removal from host caches or prior copies.
+4. Do not claim production readiness until representative scope-rejection evaluation, an approved routing policy, and serving controls are completed and reviewed.

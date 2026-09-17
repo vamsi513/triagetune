@@ -4,6 +4,44 @@ TriageTune is a local-first project for adapting a small, openly licensed langua
 
 The project is developed in checkpoints. Measurements are recorded only after the corresponding command has been run.
 
+This is a public research release, **not** an automatic banking-support service. The [saved LoRA adapter](https://huggingface.co/Vamsi513/triagetune-banking77-lora) is available separately from this source repository. Classification remains disabled by default because unsupported requests are not reliably rejected and priority/team routing is provisional.
+
+| Reserved BANKING77 test set (3,080 requests) | Accuracy | Macro F1 |
+| --- | ---: | ---: |
+| TF-IDF + logistic regression | 84.68% | 84.54% |
+| Saved LoRA adapter | 80.49% | 80.50% |
+| Unchanged base model | 30.16% | 30.77% |
+
+The simpler TF-IDF baseline outperformed the adapter on this test set. Full methods, uncertainty intervals, and errors are documented below; these scores do not measure real customer traffic.
+
+## Quick start from a fresh clone (macOS/Linux)
+
+Use a machine with enough memory for the 1.5B-parameter base model. The prior CPU container used about 6.94 GiB after inference. Downloads include the separately hosted adapter and the base-model weights; both may take time. The commands use only the public repositories and do not retrain.
+
+```bash
+git clone https://github.com/vamsi513/triagetune.git
+cd triagetune
+python3 -m venv .venv
+.venv/bin/python -m pip install torch -r requirements-serving.txt
+.venv/bin/python - <<'PY'
+from huggingface_hub import snapshot_download
+
+snapshot_download(
+    repo_id="Vamsi513/triagetune-banking77-lora",
+    local_dir="artifacts/lora_adapter",
+    token=False,
+)
+snapshot_download(
+    repo_id="Qwen/Qwen2.5-1.5B-Instruct",
+    revision="989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
+    cache_dir=".cache/huggingface",
+)
+PY
+TRIAGETUNE_ENABLE_PROVISIONAL_ROUTING=1 .venv/bin/python -m uvicorn api.main:app --host 127.0.0.1 --port 8765
+```
+
+In a second terminal, send the example request shown in [Local serving](#local-serving-phase-5). The opt-in switch is for controlled local testing only; do not expose this endpoint to untrusted traffic. To run the automated checks without downloading weights, install the development requirements and run `pytest -q`. The repository's source code has no reuse license yet; the adapter's Apache 2.0 license and the dataset's CC BY 4.0 license are separate.
+
 ## Current status
 
 Phases 1 through 5 are complete for local use. The saved adapter serves real category predictions through a validated HTTP endpoint, and the CPU-only container built, started, and returned a real prediction. A later provisional routing policy adds project-created priority and team values. These values are deterministic rules based on the predicted category, not dataset labels or separately trained predictions. Unknown-request rejection remains unimplemented and the service is not ready for untrusted traffic. Provisional classification is now disabled by default and requires explicit local opt-in.
@@ -19,9 +57,9 @@ TriageTune uses BANKING77, a collection of English online-banking queries annota
 - Published test records: 3,080
 - Provenance: annotated customer queries; not synthetic data
 
-The tracked source and derived data, attribution, checksums, and external challenge-set provenance are documented in `DATA_PROVENANCE.md`. The source-code license has not been selected; public visibility alone would not grant reuse rights.
+The tracked source and derived data, attribution, checksums, and external challenge-set provenance are documented in `DATA_PROVENANCE.md`. The source-code license has not been selected; public visibility alone does not grant reuse rights.
 
-The current engineering assessment and release blockers are in `reports/engineering_audit.md`. Repository publication is paused pending the privacy steps in `reports/publication_plan.md`.
+The engineering assessment and deployment blockers are in `reports/engineering_audit.md`. The public-release decision, including the known commit-email disclosure, is recorded in `reports/publication_plan.md`.
 
 The published test set remains reserved for final evaluation. Only the published training pool is divided into project training and validation splits.
 
