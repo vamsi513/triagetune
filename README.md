@@ -6,7 +6,7 @@ The project is developed in checkpoints. Measurements are recorded only after th
 
 ## Current status
 
-Phases 1 through 4 are complete. The reserved test split has been scored once with all four approaches, followed by confidence intervals, error analysis, and a diagnostic robustness evaluation. Serving has not started.
+Phases 1 through 5 are complete for local category-only use. The saved adapter serves real predictions through a validated HTTP endpoint, and the CPU-only container built, started, and returned a real prediction. Unknown-request rejection and priority/team annotations remain unimplemented because their behavior has not been validated or approved.
 
 ## Dataset
 
@@ -217,13 +217,58 @@ python src/evaluate_robustness.py
 
 ## Routing outputs
 
-The intended inference response contains:
+The current serving response contains only:
 
 - `category`: a canonical BANKING77 intent
+
+The intended full routing response would also contain:
+
 - `priority`: a project-created routing annotation
 - `team`: a project-created routing annotation
 
 BANKING77 supplies only the intent. Priority and team mappings require separate approval and will be documented as project-created annotations rather than original dataset labels.
+
+## Local serving: Phase 5
+
+The service loads the saved adapter once at startup and exposes `GET /health`, `GET /model-info`, and `POST /classify`. Classification accepts a nonblank `text` field and returns a validated canonical `category`. Extra request fields, text over 2,000 characters, and rendered prompts over 1,024 tokens are rejected. A malformed or disallowed model category returns HTTP 422; it is never silently repaired or represented as a successful prediction. Generation is serialized behind a lock to limit accelerator-memory pressure under concurrent requests.
+
+Run the native service from the project root after installing `requirements.txt` and ensuring the locally saved adapter and model cache are present:
+
+```bash
+uvicorn api.main:app --host 127.0.0.1 --port 8765
+```
+
+Example request:
+
+```bash
+curl -X POST http://127.0.0.1:8765/classify \
+  -H 'Content-Type: application/json' \
+  -d '{"text":"I cannot use my PIN."}'
+```
+
+This returned `{"category":"pin_blocked"}` during the measured local run. A separate in-scope card-swallowed request returned HTTP 422 because the model output was disallowed, so successful handling is not universal. The out-of-scope robustness result remains unresolved; this endpoint should not be exposed as a trusted general-purpose router.
+
+The container uses a CPU-only runtime. It deliberately excludes model weights from the image; provide the ignored local adapter and base-model cache as read-only mounts:
+
+```bash
+docker build -t triagetune-local:phase5 .
+docker run --rm -p 127.0.0.1:8766:8000 \
+  -v "$PWD/artifacts/lora_adapter:/models/adapter:ro" \
+  -v "$PWD/.cache/huggingface:/models/cache:ro" \
+  triagetune-local:phase5
+```
+
+The image built and ran on ARM Linux. Health and model-info returned HTTP 200, the container reached healthy status, and the same example returned the expected category. Container loading took 35.54 seconds on CPU and observed memory after inference was 6.942 GiB of a 7.748 GiB Docker limit. This is functional but too memory-heavy for a small laptop to leave running casually.
+
+The native service loaded in 5.21 seconds on the Mac accelerator. A local test used 20 measured requests with four concurrent clients after one warmup: 20/20 returned the same valid category, with 1.46-second P50 and 1.50-second P95 end-to-end latency. Peak process RSS during that run was 225,001,472 bytes; it excludes accelerator allocations. The serialized adapter and tokenizer occupy 28,893,841 bytes, of which 17,462,432 bytes are adapter weights. Full machine-readable measurements are in `reports/serving_load_test.json` and `reports/serving_runtime.json`.
+
+Run the automated checks with:
+
+```bash
+pytest -q
+```
+
+Sixteen tests passed in the recorded run, covering request validation, service endpoints, response validation, the inference path, and earlier evaluation utilities. The service runs only on loopback in the documented commands; production deployment and unknown-request rejection are not claimed.
 
 ## Project layout
 

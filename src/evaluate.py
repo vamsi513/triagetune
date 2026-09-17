@@ -14,7 +14,10 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
 
-from train_baseline import classification_metrics, portable_path, sha256_file
+try:
+    from .train_baseline import classification_metrics, portable_path, sha256_file
+except ImportError:
+    from train_baseline import classification_metrics, portable_path, sha256_file
 
 
 DEFAULT_MODEL = "Qwen/Qwen2.5-1.5B-Instruct"

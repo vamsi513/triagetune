@@ -1,0 +1,69 @@
+{
+  "evaluation": "phase_5_local_serving",
+  "stage": "phase_5",
+  "model": "saved_lora_adapter",
+  "local_service": {
+    "host": "127.0.0.1",
+    "port": 8765,
+    "health_status": 200,
+    "model_info_status": 200,
+    "successful_example": {
+      "text": "I cannot use my PIN.",
+      "status": 200,
+      "category": "pin_blocked"
+    },
+    "observed_in_scope_failure": {
+      "text": "My card was swallowed by the cash machine.",
+      "status": 422,
+      "detail": "model output is not an approved category"
+    },
+    "observed_out_of_scope_failure": {
+      "text": "How do I repair a leaking kitchen faucet?",
+      "status": 422,
+      "detail": "model output is not an approved category",
+      "interpretation": "A disallowed output is not a reliable unknown-request detector."
+    },
+    "load_test_report": "reports/serving_load_test.json",
+    "request_validation": "blank text, oversized text, and extra request fields returned 422",
+    "device": "mps",
+    "dtype": "float16",
+    "model_load_seconds": 5.207911707999301,
+    "peak_process_rss_bytes_during_load_test": 225001472,
+    "memory_note": "Process RSS excludes accelerator allocations."
+  },
+  "container": {
+    "image": "triagetune-local:phase5",
+    "architecture": "arm64",
+    "image_size_bytes": 314981576,
+    "build_succeeded": true,
+    "started": true,
+    "health_status": "healthy",
+    "health_http_status": 200,
+    "model_info_http_status": 200,
+    "successful_example": {
+      "text": "I cannot use my PIN.",
+      "status": 200,
+      "category": "pin_blocked"
+    },
+    "device": "cpu",
+    "dtype": "float32",
+    "model_load_seconds": 35.53763622499997,
+    "memory_after_inference": "6.942 GiB / 7.748 GiB Docker limit, as displayed by docker stats",
+    "adapter_and_base_cache": "read-only host mounts; not bundled into the image",
+    "stopped_after_verification": true
+  },
+  "adapter": {
+    "serialized_adapter_and_tokenizer_bytes": 28893841,
+    "adapter_weight_bytes": 17462432
+  },
+  "automated_tests": {
+    "passed": 16,
+    "failed": 0
+  },
+  "limitations": [
+    "Priority and team mappings have not been approved; the endpoint returns category only.",
+    "No calibrated unknown-request rejection exists. The 32-probe robustness run safely rejected zero of eight out-of-scope requests.",
+    "The local load test used 20 measured requests and four concurrent clients, not production traffic.",
+    "Container memory was observed once after inference, not continuously sampled."
+  ]
+}

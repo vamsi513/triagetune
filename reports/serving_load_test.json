@@ -1,0 +1,33 @@
+{
+  "environment": "local_loopback",
+  "concurrent_clients": 4,
+  "measured_requests": 20,
+  "warmup_requests": 1,
+  "successful_matching_responses": 20,
+  "failed_or_mismatched_responses": 0,
+  "request_text": "I cannot use my PIN.",
+  "expected_response": {
+    "category": "pin_blocked"
+  },
+  "p50_seconds": 1.4584780209988821,
+  "p95_seconds": 1.497947783653217,
+  "min_seconds": 0.3799857499980135,
+  "max_seconds": 1.5116062499946565,
+  "elapsed_seconds": 7.33418712499406,
+  "throughput_requests_per_second": 2.7269552384124913,
+  "server_pid": 90280,
+  "server_rss_bytes_at_start": 214220800,
+  "server_rss_bytes_peak": 225001472,
+  "server_rss_bytes_at_end": 224575488,
+  "server_memory_sampling_seconds": 0.05,
+  "model_load_seconds": 5.207911707999301,
+  "adapter_size_bytes": 28893841,
+  "adapter_weight_bytes": 17462432,
+  "device": "mps",
+  "dtype": "float16",
+  "notes": [
+    "Latency is end-to-end HTTP time after one warmup request.",
+    "The model is protected by a lock; requests may queue under concurrency.",
+    "RSS is process memory and excludes accelerator allocations."
+  ]
+}

@@ -1,0 +1,14 @@
+.cache/
+.git/
+.pytest_cache/
+.venv/
+artifacts/
+checkpoints/
+data/
+mlruns/
+notebooks/
+tests/
+reports/*
+!reports/lora_adapter_test.json
+**/__pycache__/
+**/*.pyc
