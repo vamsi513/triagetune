@@ -333,6 +333,12 @@ The image built and ran on ARM Linux. Health and model-info returned HTTP 200, t
 
 The native service loaded in 5.21 seconds on the Mac accelerator. A local test used 20 measured requests with four concurrent clients after one warmup: 20/20 returned the same valid category, with 1.46-second P50 and 1.50-second P95 end-to-end latency. Peak process RSS during that run was 225,001,472 bytes; it excludes accelerator allocations. The serialized adapter and tokenizer occupy 28,893,841 bytes, of which 17,462,432 bytes are adapter weights. Full machine-readable measurements are in `reports/serving_load_test.json` and `reports/serving_runtime.json`.
 
+## Internal agent-assist prototype
+
+The separate `POST /agent-assist` endpoint is disabled by default. In a controlled local test, enable it with `TRIAGETUNE_ENABLE_AGENT_ASSIST=1` and supply a randomly generated ASCII secret of at least 32 characters through `TRIAGETUNE_AGENT_ASSIST_KEY`. Requests must include that secret in the `X-TriageTune-Key` header. Do not put a real key in this repository, command history, or screenshots; use an appropriate secret-management mechanism for any future deployment. Keep the server bound to loopback for testing.
+
+This mode cannot run at the same time as `TRIAGETUNE_ENABLE_PROVISIONAL_ROUTING=1`. It returns no priority or team and performs no automatic routing. A valid model output returns a suggestion with `review_required: true` and `review_status: pending_human_review`; invalid or overlong model outputs return no suggestion and still require review. The endpoint does not create a review ticket, record a human decision, or verify that review actually happened. Its static key is a prototype access gate, not a complete identity or authorization system. Do not send real customer messages until a reviewed workflow, transport security, privacy controls, representative evaluation, and operational controls are in place.
+
 Run the automated checks with:
 
 ```bash
@@ -340,7 +346,7 @@ Run the automated checks with:
 .venv/bin/python -m pytest -q
 ```
 
-The recorded Phase 5 run had 16 passing tests. Later safety and release work added checks for exact category coverage, route outputs, synthetic-probe consistency, rejection-score calculations, external-report integrity, saved test metrics, model-card consistency, the recorded-results walkthrough, and the default-off serving switch. The current run passed all 35 tests. The read-only GitHub workflow runs these tests on pushes and pull requests without downloading model weights. The service runs only on loopback in the documented commands; production deployment and unknown-request rejection are not claimed.
+The recorded Phase 5 run had 16 passing tests. Later safety and release work added checks for exact category coverage, route outputs, synthetic-probe consistency, rejection-score calculations, external-report integrity, saved test metrics, model-card consistency, the recorded-results walkthrough, default-off serving, and the agent-assist access/review boundaries. The current run passed all 39 tests. The read-only GitHub workflow runs these tests on pushes and pull requests without downloading model weights. The service runs only on loopback in the documented commands; production deployment and unknown-request rejection are not claimed.
 
 ## Project layout
 

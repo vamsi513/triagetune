@@ -3,6 +3,7 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
+import pytest
 from fastapi.testclient import TestClient
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -15,6 +16,7 @@ from src.routing import build_routes
 ALL_CATEGORIES = set(
     load_categories(Path(__file__).resolve().parents[1] / "reports" / "lora_adapter_test.json")
 )
+TEST_AGENT_KEY = "a" * 32
 
 
 class FakeEngine:
@@ -109,3 +111,82 @@ def test_provisional_routing_requires_exact_environment_opt_in(monkeypatch):
     monkeypatch.setenv("TRIAGETUNE_ENABLE_PROVISIONAL_ROUTING", "1")
     with TestClient(create_app(engine_factory=FakeEngine)) as client:
         assert client.post("/classify", json={"text": "card_swallowed"}).status_code == 200
+
+
+def test_agent_assist_is_disabled_without_opt_in():
+    with TestClient(create_app(engine_factory=FakeEngine, enable_agent_assist=False)) as client:
+        assert client.get("/model-info").json()["agent_assist_enabled"] is False
+        response = client.post("/agent-assist", json={"text": "card_swallowed"})
+        assert response.status_code == 503
+
+
+def test_agent_assist_requires_a_strong_key_and_cannot_enable_routing():
+    with pytest.raises(ValueError, match="at least 32"):
+        create_app(
+            engine_factory=FakeEngine,
+            enable_agent_assist=True,
+            agent_assist_key="too-short",
+        )
+    with pytest.raises(ValueError, match="cannot be enabled together"):
+        create_app(
+            engine_factory=FakeEngine,
+            enable_agent_assist=True,
+            agent_assist_key=TEST_AGENT_KEY,
+            enable_provisional_routing=True,
+        )
+
+
+def test_agent_assist_requires_authentication_and_only_suggests_a_category():
+    with TestClient(create_app(
+        engine_factory=FakeEngine,
+        enable_agent_assist=True,
+        agent_assist_key=TEST_AGENT_KEY,
+    )) as client:
+        info = client.get("/model-info").json()
+        assert info["agent_assist_enabled"] is True
+        assert info["routing_policy"] == "not_enabled"
+        assert info["priority_and_team"] == "not_returned"
+        assert client.post("/classify", json={"text": "card_swallowed"}).status_code == 503
+        assert client.post("/agent-assist", json={"text": "card_swallowed"}).status_code == 401
+        assert client.post(
+            "/agent-assist",
+            headers={"X-TriageTune-Key": "wrong-key"},
+            json={"text": "card_swallowed"},
+        ).status_code == 401
+        response = client.post(
+            "/agent-assist",
+            headers={"X-TriageTune-Key": TEST_AGENT_KEY},
+            json={"text": "card_swallowed"},
+        )
+        assert response.status_code == 200
+        assert response.json() == {
+            "suggested_category": "card_swallowed",
+            "suggestion_status": "available",
+            "review_required": True,
+            "review_status": "pending_human_review",
+        }
+
+
+def test_agent_assist_failures_still_require_human_review():
+    with TestClient(create_app(
+        engine_factory=FakeEngine,
+        enable_agent_assist=True,
+        agent_assist_key=TEST_AGENT_KEY,
+    )) as client:
+        for text, expected_status in (
+            ("invalid output", "invalid_model_output"),
+            ("unexpected category", "invalid_model_output"),
+            ("too many tokens", "input_too_long"),
+        ):
+            response = client.post(
+                "/agent-assist",
+                headers={"X-TriageTune-Key": TEST_AGENT_KEY},
+                json={"text": text},
+            )
+            assert response.status_code == 200
+            assert response.json() == {
+                "suggested_category": None,
+                "suggestion_status": expected_status,
+                "review_required": True,
+                "review_status": "pending_human_review",
+            }

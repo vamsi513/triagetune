@@ -6,6 +6,8 @@ Publication update (2026-09-17): The owner subsequently authorized publication w
 
 License update (2026-09-17): The owner subsequently approved Apache 2.0 for project-authored source code and documentation. The full license text is now at the repository root. BANKING77 data and benchmark text keep their separate publisher license. The original no-license finding below is resolved.
 
+Agent-assist update (2026-09-17): A later default-off prototype added a static-key-protected suggestion endpoint with a pending-human-review response and no automatic route output. It does not implement named-user authorization, a review queue, privacy controls, or production deployment. The original serving-control finding below remains open beyond this narrow prototype gate.
+
 ## Assessment
 
 **Research repository: 7/10. Deployment readiness: 2/10.** These are qualitative engineering judgments, not measured model scores. The repository has a reserved test split, four baselines or model variants, confidence intervals, error analysis, real local serving checks, and explicit negative results. It is not ready for public exposure of live requests because unknown-request rejection is unreliable, routing policy is provisional, and operational controls are missing.

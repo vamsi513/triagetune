@@ -18,12 +18,14 @@ All external examples were authored for a different application. Label-level sel
 - Response validation rejects malformed or disallowed model categories.
 - Provisional classification is disabled by default. Local experiments require the explicit `TRIAGETUNE_ENABLE_PROVISIONAL_ROUTING=1` switch. The switch does not make the service safe for untrusted input.
 - No score threshold is enabled in the service.
+- A separate, default-off agent-assist prototype requires an explicitly configured key, returns only a category suggestion, and marks every response as pending human review. It cannot be enabled together with provisional routing. This is an access gate and response contract, not an implemented review queue or production identity system.
 
 ## Release blockers
 
 1. **Scope rejection:** Gather a larger, independently reviewed set of both valid and unsupported requests representative of the intended channel. Include banking-adjacent unknowns, urgent wording, and unusual but valid banking queries. Separate calibration from final evaluation before selecting a rule.
 2. **Operational tolerance:** The service owner must define acceptable rates of missed unsupported requests and wrongly rejected valid requests, including any stricter rule for fraud or account-access cases. No numerical release gate should be invented after seeing results.
 3. **Routing policy:** A responsible owner must confirm real team names, priority semantics, escalation exceptions, and fallback handling. Current values are provisional examples, not an approved queue policy.
-4. **Serving controls:** Authentication, traffic limits, privacy-safe logging, retention rules, incident handling, and monitoring have not been implemented or verified. The prior local load test is not a capacity or security assessment.
+4. **Serving controls:** The agent-assist prototype has only a static-key access gate. Named user identity, authorization, transport security, traffic limits, privacy-safe logging, retention rules, incident handling, and monitoring have not been implemented or verified. The prior local load test is not a capacity or security assessment.
+5. **Human review workflow:** The API marks suggestions as pending review but does not create a case, record a reviewer decision, or prevent another system from acting on a suggestion. An authenticated human workflow and audit trail must be designed and verified before real requests are accepted.
 
 Until these blockers are addressed, keep the classification switch off outside controlled local testing. If real requests are supplied for evaluation, remove personal data before sharing and retain a separately held-out final set.

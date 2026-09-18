@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 import os
+import secrets
 from contextlib import asynccontextmanager
 from typing import Annotated, Callable, Literal
 
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException
 from fastapi.concurrency import run_in_threadpool
+from fastapi.security import APIKeyHeader
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints
 
 from src.inference import (
@@ -35,6 +37,13 @@ class ClassifyResponse(BaseModel):
     routing_policy: Literal["provisional_project_mapping"]
 
 
+class AgentAssistResponse(BaseModel):
+    suggested_category: str | None
+    suggestion_status: Literal["available", "invalid_model_output", "input_too_long"]
+    review_required: Literal[True]
+    review_status: Literal["pending_human_review"]
+
+
 class HealthResponse(BaseModel):
     status: str
     model_loaded: bool
@@ -54,18 +63,32 @@ class ModelInfoResponse(BaseModel):
     max_new_tokens: int
     unknown_request_handling: str
     priority_and_team: str
-    routing_policy: Literal["provisional_project_mapping"]
+    routing_policy: Literal["provisional_project_mapping", "not_enabled"]
     provisional_routing_enabled: bool
+    agent_assist_enabled: bool
+
+
+AGENT_ASSIST_KEY_HEADER = APIKeyHeader(name="X-TriageTune-Key", auto_error=False)
 
 
 def create_app(
     engine_factory: Callable[[], RoutingEngine] | None = None,
     enable_provisional_routing: bool | None = None,
+    enable_agent_assist: bool | None = None,
+    agent_assist_key: str | None = None,
 ) -> FastAPI:
     if engine_factory is None:
         engine_factory = lambda: RoutingEngine(InferenceSettings.from_environment())
     if enable_provisional_routing is None:
         enable_provisional_routing = os.getenv("TRIAGETUNE_ENABLE_PROVISIONAL_ROUTING") == "1"
+    if enable_agent_assist is None:
+        enable_agent_assist = os.getenv("TRIAGETUNE_ENABLE_AGENT_ASSIST") == "1"
+    if enable_agent_assist and enable_provisional_routing:
+        raise ValueError("agent assist and provisional routing cannot be enabled together")
+    if enable_agent_assist:
+        agent_assist_key = agent_assist_key or os.getenv("TRIAGETUNE_AGENT_ASSIST_KEY")
+        if not agent_assist_key or len(agent_assist_key) < 32 or not agent_assist_key.isascii():
+            raise ValueError("agent assist requires an ASCII key of at least 32 characters")
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
@@ -75,7 +98,7 @@ def create_app(
         del app.state.engine
         del app.state.routes
 
-    service = FastAPI(title="TriageTune", version="0.1.0", lifespan=lifespan)
+    service = FastAPI(title="TriageTune", version="0.2.0", lifespan=lifespan)
 
     @service.get("/health", response_model=HealthResponse)
     async def health() -> HealthResponse:
@@ -85,10 +108,44 @@ def create_app(
     async def model_info() -> ModelInfoResponse:
         return ModelInfoResponse.model_validate({
             **service.state.engine.info(),
-            "priority_and_team": "provisional_project_mapping",
-            "routing_policy": "provisional_project_mapping",
+            "priority_and_team": (
+                "provisional_project_mapping" if enable_provisional_routing else "not_returned"
+            ),
+            "routing_policy": (
+                "provisional_project_mapping" if enable_provisional_routing else "not_enabled"
+            ),
             "provisional_routing_enabled": enable_provisional_routing,
+            "agent_assist_enabled": enable_agent_assist,
         })
+
+    @service.post("/agent-assist", response_model=AgentAssistResponse)
+    async def agent_assist(
+        request: ClassifyRequest,
+        key: Annotated[str | None, Depends(AGENT_ASSIST_KEY_HEADER)],
+    ) -> AgentAssistResponse:
+        if not enable_agent_assist:
+            raise HTTPException(status_code=503, detail="agent assist is disabled")
+        if key is None or not secrets.compare_digest(key, agent_assist_key):
+            raise HTTPException(status_code=401, detail="invalid agent-assist credential")
+        try:
+            category = await run_in_threadpool(service.state.engine.classify, request.text)
+        except InputTooLong:
+            return AgentAssistResponse(
+                suggested_category=None,
+                suggestion_status="input_too_long",
+                review_required=True,
+                review_status="pending_human_review",
+            )
+        except InvalidModelOutput:
+            category = None
+        if category not in service.state.engine.allowed_categories:
+            category = None
+        return AgentAssistResponse(
+            suggested_category=category,
+            suggestion_status="available" if category else "invalid_model_output",
+            review_required=True,
+            review_status="pending_human_review",
+        )
 
     @service.post("/classify", response_model=ClassifyResponse)
     async def classify(request: ClassifyRequest) -> ClassifyResponse:
