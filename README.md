@@ -14,6 +14,8 @@ This is a public research release, **not** an automatic banking-support service.
 
 The simpler TF-IDF baseline outperformed the adapter on this test set. Full methods, uncertainty intervals, and errors are documented below; these scores do not measure real customer traffic.
 
+For a quick, no-download portfolio walkthrough, run `python3 -m src.showcase_results` from a clone. It checks and displays the saved public test predictions, including examples where the two approaches disagree. This is **recorded evaluation**, not live inference or a new performance estimate.
+
 ## Quick start from a fresh clone (macOS/Linux)
 
 Use a machine with enough memory for the 1.5B-parameter base model. The prior CPU container used about 6.94 GiB after inference. Downloads include the separately hosted adapter and the base-model weights; both may take time. The commands use only the public repositories and do not retrain.
@@ -338,7 +340,7 @@ Run the automated checks with:
 .venv/bin/python -m pytest -q
 ```
 
-The recorded Phase 5 run had 16 passing tests. Later safety and release work added checks for exact category coverage, route outputs, synthetic-probe consistency, rejection-score calculations, external-report integrity, saved test metrics, model-card consistency, and the default-off serving switch. The current run passed all 32 tests. The read-only GitHub workflow runs these tests on pushes and pull requests without downloading model weights. The service runs only on loopback in the documented commands; production deployment and unknown-request rejection are not claimed.
+The recorded Phase 5 run had 16 passing tests. Later safety and release work added checks for exact category coverage, route outputs, synthetic-probe consistency, rejection-score calculations, external-report integrity, saved test metrics, model-card consistency, the recorded-results walkthrough, and the default-off serving switch. The current run passed all 35 tests. The read-only GitHub workflow runs these tests on pushes and pull requests without downloading model weights. The service runs only on loopback in the documented commands; production deployment and unknown-request rejection are not claimed.
 
 ## Project layout
 
@@ -363,6 +365,7 @@ triagetune/
 │   ├── inference.py
 │   ├── package_adapter.py
 │   ├── prepare_data.py
+│   ├── showcase_results.py
 │   ├── summarize_test_evaluation.py
 │   ├── train_baseline.py
 │   └── train_lora.py
