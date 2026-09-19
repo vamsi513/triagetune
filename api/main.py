@@ -5,11 +5,13 @@ from __future__ import annotations
 import os
 import secrets
 from contextlib import asynccontextmanager
+from pathlib import Path
 from typing import Annotated, Callable, Literal
 
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.concurrency import run_in_threadpool
 from fastapi.security import APIKeyHeader
+from fastapi.responses import FileResponse
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints
 
 from src.inference import (
@@ -44,6 +46,11 @@ class AgentAssistResponse(BaseModel):
     review_status: Literal["pending_human_review"]
 
 
+class AgentAssistCategoriesResponse(BaseModel):
+    categories: list[str]
+    review_required: Literal[True]
+
+
 class HealthResponse(BaseModel):
     status: str
     model_loaded: bool
@@ -69,6 +76,7 @@ class ModelInfoResponse(BaseModel):
 
 
 AGENT_ASSIST_KEY_HEADER = APIKeyHeader(name="X-TriageTune-Key", auto_error=False)
+REVIEWER_DIR = Path(__file__).resolve().parent / "reviewer"
 
 
 def create_app(
@@ -100,6 +108,12 @@ def create_app(
 
     service = FastAPI(title="TriageTune", version="0.2.0", lifespan=lifespan)
 
+    def require_agent_assist(key: str | None) -> None:
+        if not enable_agent_assist:
+            raise HTTPException(status_code=503, detail="agent assist is disabled")
+        if key is None or not secrets.compare_digest(key, agent_assist_key):
+            raise HTTPException(status_code=401, detail="invalid agent-assist credential")
+
     @service.get("/health", response_model=HealthResponse)
     async def health() -> HealthResponse:
         return HealthResponse(status="ok", model_loaded=True)
@@ -123,10 +137,7 @@ def create_app(
         request: ClassifyRequest,
         key: Annotated[str | None, Depends(AGENT_ASSIST_KEY_HEADER)],
     ) -> AgentAssistResponse:
-        if not enable_agent_assist:
-            raise HTTPException(status_code=503, detail="agent assist is disabled")
-        if key is None or not secrets.compare_digest(key, agent_assist_key):
-            raise HTTPException(status_code=401, detail="invalid agent-assist credential")
+        require_agent_assist(key)
         try:
             category = await run_in_threadpool(service.state.engine.classify, request.text)
         except InputTooLong:
@@ -145,6 +156,55 @@ def create_app(
             suggestion_status="available" if category else "invalid_model_output",
             review_required=True,
             review_status="pending_human_review",
+        )
+
+    @service.get("/agent-assist/categories", response_model=AgentAssistCategoriesResponse)
+    async def agent_assist_categories(
+        key: Annotated[str | None, Depends(AGENT_ASSIST_KEY_HEADER)],
+    ) -> AgentAssistCategoriesResponse:
+        require_agent_assist(key)
+        return AgentAssistCategoriesResponse(
+            categories=sorted(service.state.engine.allowed_categories),
+            review_required=True,
+        )
+
+    @service.get("/reviewer", include_in_schema=False)
+    async def reviewer() -> FileResponse:
+        if not enable_agent_assist:
+            raise HTTPException(status_code=503, detail="agent assist is disabled")
+        return FileResponse(
+            REVIEWER_DIR / "index.html",
+            media_type="text/html",
+            headers={
+                "Cache-Control": "no-store",
+                "Content-Security-Policy": (
+                    "default-src 'none'; script-src 'self'; style-src 'self'; "
+                    "connect-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
+                ),
+                "Referrer-Policy": "no-referrer",
+                "X-Content-Type-Options": "nosniff",
+                "X-Frame-Options": "DENY",
+            },
+        )
+
+    @service.get("/reviewer/reviewer.css", include_in_schema=False)
+    async def reviewer_css() -> FileResponse:
+        if not enable_agent_assist:
+            raise HTTPException(status_code=503, detail="agent assist is disabled")
+        return FileResponse(
+            REVIEWER_DIR / "reviewer.css",
+            media_type="text/css",
+            headers={"Cache-Control": "no-store", "X-Content-Type-Options": "nosniff"},
+        )
+
+    @service.get("/reviewer/reviewer.js", include_in_schema=False)
+    async def reviewer_js() -> FileResponse:
+        if not enable_agent_assist:
+            raise HTTPException(status_code=503, detail="agent assist is disabled")
+        return FileResponse(
+            REVIEWER_DIR / "reviewer.js",
+            media_type="text/javascript",
+            headers={"Cache-Control": "no-store", "X-Content-Type-Options": "nosniff"},
         )
 
     @service.post("/classify", response_model=ClassifyResponse)

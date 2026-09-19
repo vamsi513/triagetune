@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TriageTune Reviewer</title>
+  <link rel="stylesheet" href="/reviewer/reviewer.css">
+  <script src="/reviewer/reviewer.js" defer></script>
+</head>
+<body>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">LOCAL AGENT ASSIST</p>
+      <h1>Review every suggestion.</h1>
+      <p class="lede">This prototype suggests one BANKING77 category. It never routes a request, assigns a team, or stores a reviewer decision.</p>
+    </header>
+
+    <section class="warning" aria-label="Safety notice">
+      <strong>Controlled testing only.</strong>
+      <span>Use synthetic or de-identified text. Do not expose this local service to the internet.</span>
+    </section>
+
+    <section class="panel" aria-labelledby="access-title">
+      <div class="panel-heading">
+        <span class="step">01</span>
+        <div>
+          <h2 id="access-title">Unlock this session</h2>
+          <p>The key is kept only in page memory and is cleared when the page closes.</p>
+        </div>
+      </div>
+      <form id="access-form">
+        <label for="access-key">Agent-assist key</label>
+        <div class="inline-control">
+          <input id="access-key" name="access-key" type="password" minlength="32" required autocomplete="off" spellcheck="false">
+          <button type="submit">Unlock</button>
+        </div>
+      </form>
+      <p id="access-status" class="status" role="status" aria-live="polite">Locked</p>
+    </section>
+
+    <section class="panel" aria-labelledby="request-title">
+      <div class="panel-heading">
+        <span class="step">02</span>
+        <div>
+          <h2 id="request-title">Request a suggestion</h2>
+          <p>Enter one synthetic or de-identified support message.</p>
+        </div>
+      </div>
+      <form id="suggestion-form">
+        <label for="request-text">Support message</label>
+        <textarea id="request-text" name="request-text" maxlength="2000" rows="5" required disabled></textarea>
+        <div class="form-footer">
+          <span id="character-count">0 / 2000</span>
+          <button id="suggest-button" type="submit" disabled>Suggest category</button>
+        </div>
+      </form>
+      <p id="suggestion-status" class="status" role="status" aria-live="polite">Unlock the session first.</p>
+    </section>
+
+    <section class="panel review-panel" aria-labelledby="review-title">
+      <div class="panel-heading">
+        <span class="step">03</span>
+        <div>
+          <h2 id="review-title">Make the human decision</h2>
+          <p>The model suggestion is never accepted automatically.</p>
+        </div>
+      </div>
+      <dl class="suggestion-card">
+        <div>
+          <dt>Suggested category</dt>
+          <dd id="suggested-category">No suggestion requested</dd>
+        </div>
+        <div>
+          <dt>Status</dt>
+          <dd id="suggested-status">Pending input</dd>
+        </div>
+      </dl>
+      <label for="review-category">Reviewer-selected category</label>
+      <select id="review-category" disabled>
+        <option value="">Choose a category</option>
+      </select>
+      <div class="review-actions">
+        <button id="accept-button" type="button" disabled>Accept suggestion</button>
+        <button id="override-button" type="button" class="secondary" disabled>Confirm selected category</button>
+        <button id="unsupported-button" type="button" class="danger" disabled>Mark unsupported</button>
+      </div>
+      <p id="review-status" class="status" role="status" aria-live="polite">Human review has not started.</p>
+      <p class="ephemeral">Decisions shown here remain only in this browser tab. They are not sent to a queue or written to disk.</p>
+    </section>
+  </main>
+</body>
+</html>

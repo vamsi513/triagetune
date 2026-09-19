@@ -118,6 +118,9 @@ def test_agent_assist_is_disabled_without_opt_in():
         assert client.get("/model-info").json()["agent_assist_enabled"] is False
         response = client.post("/agent-assist", json={"text": "card_swallowed"})
         assert response.status_code == 503
+        assert client.get("/reviewer").status_code == 503
+        assert client.get("/reviewer/reviewer.css").status_code == 503
+        assert client.get("/reviewer/reviewer.js").status_code == 503
 
 
 def test_agent_assist_requires_a_strong_key_and_cannot_enable_routing():
@@ -190,3 +193,50 @@ def test_agent_assist_failures_still_require_human_review():
                 "review_required": True,
                 "review_status": "pending_human_review",
             }
+
+
+def test_agent_assist_category_reference_requires_authentication():
+    with TestClient(create_app(
+        engine_factory=FakeEngine,
+        enable_agent_assist=True,
+        agent_assist_key=TEST_AGENT_KEY,
+    )) as client:
+        assert client.get("/agent-assist/categories").status_code == 401
+        response = client.get(
+            "/agent-assist/categories",
+            headers={"X-TriageTune-Key": TEST_AGENT_KEY},
+        )
+        assert response.status_code == 200
+        assert response.json() == {
+            "categories": sorted(ALL_CATEGORIES),
+            "review_required": True,
+        }
+
+
+def test_local_reviewer_page_has_no_store_security_headers_and_external_assets():
+    with TestClient(create_app(
+        engine_factory=FakeEngine,
+        enable_agent_assist=True,
+        agent_assist_key=TEST_AGENT_KEY,
+    )) as client:
+        page = client.get("/reviewer")
+        assert page.status_code == 200
+        assert page.headers["cache-control"] == "no-store"
+        assert page.headers["x-frame-options"] == "DENY"
+        assert page.headers["x-content-type-options"] == "nosniff"
+        assert "default-src 'none'" in page.headers["content-security-policy"]
+        assert "frame-ancestors 'none'" in page.headers["content-security-policy"]
+        assert '<script src="/reviewer/reviewer.js" defer></script>' in page.text
+        assert "Human review" in page.text
+        assert "not sent to a queue" in page.text
+
+        stylesheet = client.get("/reviewer/reviewer.css")
+        script = client.get("/reviewer/reviewer.js")
+        assert stylesheet.status_code == script.status_code == 200
+        assert stylesheet.headers["cache-control"] == "no-store"
+        assert script.headers["cache-control"] == "no-store"
+        assert "localStorage" not in script.text
+        assert "sessionStorage" not in script.text
+        assert "document.cookie" not in script.text
+        assert "console." not in script.text
+        assert 'headers: {...authHeaders(), "Content-Type": "application/json"}' in script.text

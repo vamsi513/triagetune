@@ -337,6 +337,16 @@ The native service loaded in 5.21 seconds on the Mac accelerator. A local test u
 
 The separate `POST /agent-assist` endpoint is disabled by default. In a controlled local test, enable it with `TRIAGETUNE_ENABLE_AGENT_ASSIST=1` and supply a randomly generated ASCII secret of at least 32 characters through `TRIAGETUNE_AGENT_ASSIST_KEY`. Requests must include that secret in the `X-TriageTune-Key` header. Do not put a real key in this repository, command history, or screenshots; use an appropriate secret-management mechanism for any future deployment. Keep the server bound to loopback for testing.
 
+After completing the model downloads in the quick start, launch the local reviewer interface with:
+
+```bash
+export TRIAGETUNE_ENABLE_AGENT_ASSIST=1
+export TRIAGETUNE_AGENT_ASSIST_KEY="$(python3 -c 'import secrets; print(secrets.token_urlsafe(32))')"
+.venv/bin/python -m uvicorn api.main:app --host 127.0.0.1 --port 8765
+```
+
+Open <http://127.0.0.1:8765/reviewer>, paste the key from the same shell with `printf '%s\n' "$TRIAGETUNE_AGENT_ASSIST_KEY"`, and use only synthetic or de-identified text. The page retains its key, request, suggestion, and review decision only in the open browser tab. It does not use browser storage, write an audit record, or submit a decision to another system. Stop the local process and close the tab when finished.
+
 This mode cannot run at the same time as `TRIAGETUNE_ENABLE_PROVISIONAL_ROUTING=1`. It returns no priority or team and performs no automatic routing. A valid model output returns a suggestion with `review_required: true` and `review_status: pending_human_review`; invalid or overlong model outputs return no suggestion and still require review. The endpoint does not create a review ticket, record a human decision, or verify that review actually happened. Its static key is a prototype access gate, not a complete identity or authorization system. Do not send real customer messages until a reviewed workflow, transport security, privacy controls, representative evaluation, and operational controls are in place.
 
 Run the automated checks with:
@@ -346,7 +356,7 @@ Run the automated checks with:
 .venv/bin/python -m pytest -q
 ```
 
-The recorded Phase 5 run had 16 passing tests. Later safety and release work added checks for exact category coverage, route outputs, synthetic-probe consistency, rejection-score calculations, external-report integrity, saved test metrics, model-card consistency, the recorded-results walkthrough, default-off serving, and the agent-assist access/review boundaries. The current run passed all 39 tests. The read-only GitHub workflow runs these tests on pushes and pull requests without downloading model weights. The service runs only on loopback in the documented commands; production deployment and unknown-request rejection are not claimed.
+The recorded Phase 5 run had 16 passing tests. Later safety and release work added checks for exact category coverage, route outputs, synthetic-probe consistency, rejection-score calculations, external-report integrity, saved test metrics, model-card consistency, the recorded-results walkthrough, default-off serving, and the agent-assist access/review boundaries. The current run passed all 41 tests. The read-only GitHub workflow runs these tests on pushes and pull requests without downloading model weights. The service runs only on loopback in the documented commands; production deployment and unknown-request rejection are not claimed.
 
 ## Project layout
 

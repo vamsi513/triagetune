@@ -18,7 +18,7 @@ All external examples were authored for a different application. Label-level sel
 - Response validation rejects malformed or disallowed model categories.
 - Provisional classification is disabled by default. Local experiments require the explicit `TRIAGETUNE_ENABLE_PROVISIONAL_ROUTING=1` switch. The switch does not make the service safe for untrusted input.
 - No score threshold is enabled in the service.
-- A separate, default-off agent-assist prototype requires an explicitly configured key, returns only a category suggestion, and marks every response as pending human review. It cannot be enabled together with provisional routing. This is an access gate and response contract, not an implemented review queue or production identity system.
+- A separate, default-off agent-assist prototype requires an explicitly configured key, returns only a category suggestion, and marks every response as pending human review. It cannot be enabled together with provisional routing. Its local reviewer page keeps request and decision state only in the open browser tab and does not submit a decision. This is an access gate and demonstration interface, not an implemented review queue or production identity system.
 
 ## Release blockers
 
