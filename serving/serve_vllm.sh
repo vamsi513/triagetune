@@ -85,7 +85,7 @@ ARGS=(
   --gpu-memory-utilization "$GPU_FRACTION"
   --host "$HOST"
   --port "$PORT"
-  --disable-log-requests
+  --no-enable-log-requests
 )
 if [ -n "${VLLM_EXTRA_ARGS:-}" ]; then
   # shellcheck disable=SC2206
