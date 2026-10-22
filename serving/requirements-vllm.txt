@@ -1,0 +1,14 @@
+# GPU-only serving benchmark dependencies. Install these in a separate
+# environment from requirements.txt: vLLM pins its own torch build and will
+# replace an existing one.
+#
+# vllm 0.32.0 was the latest release on PyPI on 2026-10-22 (published
+# 2026-10-18). It requires Python >=3.11,<3.15 and installs torch==2.13.0 and
+# transformers>=5.16.1, which matches the transformers==5.16.1 pin already in
+# requirements-serving.txt.
+vllm==0.32.0
+
+# Benchmark client and chart output.
+httpx>=0.27,<1
+matplotlib>=3.9,<4
+psutil>=6.0,<8
